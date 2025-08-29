@@ -18,7 +18,7 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'person.crop.circle': 'person',
   'clock.arrow.circlepath': 'history',
-  'figure.run': 'directions-run',
+  'dumbbell.fill': 'fitness-center',
   'list.bullet': 'list',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
