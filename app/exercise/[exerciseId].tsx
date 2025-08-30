@@ -3,8 +3,13 @@ import { ThemedView } from '@/components/ThemedView';
 import { Exercise } from '@/services/exerciseService';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const toTitleCase = (str: string) => {
+  if (!str) return '';
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
 
 export default function ExerciseDetailScreen() {
   const params = useLocalSearchParams();
@@ -22,31 +27,32 @@ export default function ExerciseDetailScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: item.name }} />
-      <ThemedView style={styles.container}>
-        <Image source={{ uri: item.gifUrl }} style={styles.image} />
-        <ThemedText type="title">{item.name}</ThemedText>
-        <View style={styles.infoContainer}>
-          <ThemedText type="subtitle">Instructions</ThemedText>
-          {item.instructions?.map((instruction, index) => (
-            <ThemedText key={index} style={styles.instruction}>
-              {`${index + 1}. ${instruction}`}
-            </ThemedText>
-          ))}
-        </View>
-        <View style={styles.infoContainer}>
-          <ThemedText type="subtitle">Target Muscles</ThemedText>
-          <ThemedText>{item.targetMuscles?.join(', ')}</ThemedText>
-        </View>
-        <View style={styles.infoContainer}>
-          <ThemedText type="subtitle">Secondary Muscles</ThemedText>
-          <ThemedText>{item.secondaryMuscles?.join(', ')}</ThemedText>
-        </View>
-        <View style={styles.infoContainer}>
-          <ThemedText type="subtitle">Equipment</ThemedText>
-          <ThemedText>{item.equipments?.join(', ')}</ThemedText>
-        </View>
-      </ThemedView>
+      <Stack.Screen options={{ title: toTitleCase(item.name) }} />
+      <ScrollView>
+        <ThemedView style={styles.container}>
+          <Image source={{ uri: item.gifUrl }} style={styles.image} />
+          <View style={styles.infoContainer}>
+            <ThemedText type="subtitle">Instructions</ThemedText>
+            {item.instructions?.map((instruction, index) => (
+              <ThemedText key={index} style={styles.instruction}>
+                {`${index + 1}. ${instruction}`}
+              </ThemedText>
+            ))}
+          </View>
+          <View style={styles.infoContainer}>
+            <ThemedText type="subtitle">Target Muscles</ThemedText>
+            <ThemedText>{item.targetMuscles?.join(', ')}</ThemedText>
+          </View>
+          <View style={styles.infoContainer}>
+            <ThemedText type="subtitle">Secondary Muscles</ThemedText>
+            <ThemedText>{item.secondaryMuscles?.join(', ')}</ThemedText>
+          </View>
+          <View style={styles.infoContainer}>
+            <ThemedText type="subtitle">Equipment</ThemedText>
+            <ThemedText>{item.equipments?.join(', ')}</ThemedText>
+          </View>
+        </ThemedView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
