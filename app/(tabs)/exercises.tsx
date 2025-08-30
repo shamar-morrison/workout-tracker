@@ -5,6 +5,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import { Image } from 'expo-image';
+import { Link } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -91,15 +92,22 @@ export default function ExercisesScreen() {
             data={exercises}
             keyExtractor={(item) => item.exerciseId}
             renderItem={({ item }) => (
-              <View style={styles.exerciseContainer}>
-                <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
-                <View style={styles.exerciseDetails}>
-                  <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
-                  <ThemedText style={styles.exerciseBodyPart}>
-                    {toTitleCase(item.bodyParts.join(', '))}
-                  </ThemedText>
-                </View>
-              </View>
+              <Link
+                href={{
+                  pathname: '/exercise/[exerciseId]',
+                  params: { ...item },
+                }}
+                asChild>
+                <TouchableOpacity style={styles.exerciseContainer}>
+                  <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                  <View style={styles.exerciseDetails}>
+                    <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
+                    <ThemedText style={styles.exerciseBodyPart}>
+                      {toTitleCase(item.bodyParts.join(', '))}
+                    </ThemedText>
+                  </View>
+                </TouchableOpacity>
+              </Link>
             )}
           />
         )}
