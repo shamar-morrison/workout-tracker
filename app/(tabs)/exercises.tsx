@@ -4,9 +4,14 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
+import { Image } from 'expo-image';
 import React from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const toTitleCase = (str: string) => {
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
 
 export default function ExercisesScreen() {
   const [exercises, setExercises] = React.useState<Exercise[]>([]);
@@ -74,11 +79,13 @@ export default function ExercisesScreen() {
             data={exercises}
             keyExtractor={(item) => item.exerciseId}
             renderItem={({ item }) => (
-              <ThemedView style={styles.exerciseContainer}>
-                <ThemedText type="subtitle">{item.name}</ThemedText>
-                <ThemedText>Target: {item.targetMuscles.join(', ')}</ThemedText>
-                <ThemedText>Equipment: {item.equipments.join(', ')}</ThemedText>
-              </ThemedView>
+              <View style={styles.exerciseContainer}>
+                <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                <View>
+                  <ThemedText type="subtitle">{toTitleCase(item.name)}</ThemedText>
+                  <ThemedText>{toTitleCase(item.bodyParts.join(', '))}</ThemedText>
+                </View>
+              </View>
             )}
           />
         )}
@@ -116,5 +123,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  exerciseImage: {
+    width: 50,
+    height: 50,
+    marginRight: 16,
   },
 });
