@@ -21,6 +21,7 @@ const MAPPING = {
   'dumbbell.fill': 'fitness-center',
   'list.bullet': 'list',
   'magnifyingglass': 'search',
+  'xmark.circle.fill': 'cancel',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
 } as IconMapping;

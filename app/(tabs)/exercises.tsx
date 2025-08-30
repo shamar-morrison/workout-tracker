@@ -6,7 +6,14 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import { Image } from 'expo-image';
 import React from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const toTitleCase = (str: string) => {
@@ -71,6 +78,11 @@ export default function ExercisesScreen() {
             value={search}
             onChangeText={setSearch}
           />
+          {search ? (
+            <TouchableOpacity onPress={() => setSearch('')}>
+              <IconSymbol name="xmark.circle.fill" size={20} color="#888" />
+            </TouchableOpacity>
+          ) : null}
         </View>
         {loading ? (
           <ActivityIndicator size="large" />
