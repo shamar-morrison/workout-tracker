@@ -53,9 +53,10 @@ export default function ExerciseDetailScreen() {
           <View style={styles.infoContainer}>
             <ThemedText type="subtitle">Instructions</ThemedText>
             {formattedInstructions.map((instruction, index) => (
-              <ThemedText key={index} style={styles.instruction}>
-                {`${index + 1}. ${instruction}`}
-              </ThemedText>
+              <View key={index} style={styles.instructionContainer}>
+                <ThemedText style={styles.stepNumber}>{`${index + 1}.`}</ThemedText>
+                <ThemedText style={styles.instructionText}>{instruction}</ThemedText>
+              </View>
             ))}
           </View>
           <View style={styles.infoContainer}>
@@ -90,7 +91,16 @@ const styles = StyleSheet.create({
   infoContainer: {
     gap: 8,
   },
-  instruction: {
+  instructionContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  stepNumber: {
+    fontSize: 16,
+  },
+  instructionText: {
+    flex: 1,
     fontSize: 16,
   },
 });
