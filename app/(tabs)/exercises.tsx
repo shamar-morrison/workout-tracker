@@ -81,9 +81,11 @@ export default function ExercisesScreen() {
             renderItem={({ item }) => (
               <View style={styles.exerciseContainer}>
                 <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
-                <View>
-                  <ThemedText type="subtitle">{toTitleCase(item.name)}</ThemedText>
-                  <ThemedText>{toTitleCase(item.bodyParts.join(', '))}</ThemedText>
+                <View style={styles.exerciseDetails}>
+                  <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
+                  <ThemedText style={styles.exerciseBodyPart}>
+                    {toTitleCase(item.bodyParts.join(', '))}
+                  </ThemedText>
                 </View>
               </View>
             )}
@@ -120,8 +122,8 @@ const styles = StyleSheet.create({
   },
   exerciseContainer: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#2d2d2d',
     gap: 8,
     flexDirection: 'row',
     alignItems: 'center',
@@ -130,5 +132,16 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     marginRight: 16,
+  },
+  exerciseDetails: {
+    flex: 1,
+  },
+  exerciseName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  exerciseBodyPart: {
+    fontSize: 14,
+    color: '#888',
   },
 });
