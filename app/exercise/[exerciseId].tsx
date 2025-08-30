@@ -3,6 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Exercise } from '@/services/exerciseService';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -25,6 +26,24 @@ export default function ExerciseDetailScreen() {
     instructions: (params.instructions as string)?.split(',') || [],
   };
 
+  const formattedInstructions = React.useMemo(() => {
+    if (!item.instructions) {
+      return [];
+    }
+    const processed: string[] = [];
+    item.instructions.forEach((instruction) => {
+      if (instruction.match(/^Step:\d+/)) {
+        const cleanInstruction = instruction.replace(/^Step:\d+\s*/, '');
+        processed.push(cleanInstruction);
+      } else if (processed.length > 0) {
+        processed[processed.length - 1] += ` ${instruction}`;
+      } else {
+        processed.push(instruction);
+      }
+    });
+    return processed;
+  }, [item.instructions]);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen options={{ title: toTitleCase(item.name) }} />
@@ -33,7 +52,7 @@ export default function ExerciseDetailScreen() {
           <Image source={{ uri: item.gifUrl }} style={styles.image} />
           <View style={styles.infoContainer}>
             <ThemedText type="subtitle">Instructions</ThemedText>
-            {item.instructions?.map((instruction, index) => (
+            {formattedInstructions.map((instruction, index) => (
               <ThemedText key={index} style={styles.instruction}>
                 {`${index + 1}. ${instruction}`}
               </ThemedText>
