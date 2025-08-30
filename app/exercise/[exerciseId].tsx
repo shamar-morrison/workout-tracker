@@ -5,7 +5,6 @@ import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const toTitleCase = (str: string) => {
   if (!str) return '';
@@ -45,10 +44,10 @@ export default function ExerciseDetailScreen() {
   }, [item.instructions]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <ThemedView style={styles.outerContainer}>
       <Stack.Screen options={{ title: toTitleCase(item.name) }} />
       <ScrollView>
-        <ThemedView style={styles.container}>
+        <View style={styles.innerContainer}>
           <Image source={{ uri: item.gifUrl }} style={styles.image} />
           <View style={styles.infoContainer}>
             <ThemedText type="subtitle">Instructions</ThemedText>
@@ -71,16 +70,18 @@ export default function ExerciseDetailScreen() {
             <ThemedText type="subtitle">Equipment</ThemedText>
             <ThemedText>{item.equipments?.join(', ')}</ThemedText>
           </View>
-        </ThemedView>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
+  outerContainer: {
     flex: 1,
+  },
+  innerContainer: {
+    padding: 16,
     gap: 16,
   },
   image: {
