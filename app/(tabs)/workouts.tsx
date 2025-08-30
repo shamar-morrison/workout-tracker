@@ -1,18 +1,18 @@
 import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function WorkoutsScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
-          Workouts
-        </ThemedText>
-      </ThemedView>
-    </SafeAreaView>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title" style={[styles.title, { marginTop: insets.top }]}>
+        Workouts
+      </ThemedText>
+    </ThemedView>
   );
 }
 

@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const toTitleCase = (str: string) => {
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
@@ -59,60 +59,61 @@ export default function ExercisesScreen() {
     };
   }, [search]);
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
-          Exercises
-        </ThemedText>
-        <View style={styles.searchContainer}>
-          <IconSymbol
-            name="magnifyingglass"
-            size={20}
-            color={Colors[colorScheme ?? 'light'].text}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={[styles.searchBar, { color: Colors[colorScheme ?? 'light'].text }]}
-            placeholder="Search for an exercise..."
-            placeholderTextColor={Colors[colorScheme ?? 'light'].text}
-            value={search}
-            onChangeText={setSearch}
-          />
-          {search ? (
-            <TouchableOpacity onPress={() => setSearch('')}>
-              <IconSymbol name="xmark.circle.fill" size={20} color="#888" />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-        {loading ? (
-          <ActivityIndicator size="large" />
-        ) : (
-          <FlatList
-            data={exercises}
-            keyExtractor={(item) => item.exerciseId}
-            renderItem={({ item }) => (
-              <Link
-                href={{
-                  pathname: '/exercise/[exerciseId]',
-                  params: { ...item },
-                }}
-                asChild>
-                <TouchableOpacity style={styles.exerciseContainer}>
-                  <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
-                  <View style={styles.exerciseDetails}>
-                    <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
-                    <ThemedText style={styles.exerciseBodyPart}>
-                      {toTitleCase(item.bodyParts.join(', '))}
-                    </ThemedText>
-                  </View>
-                </TouchableOpacity>
-              </Link>
-            )}
-          />
-        )}
-      </ThemedView>
-    </SafeAreaView>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title" style={[styles.title, { marginTop: insets.top }]}>
+        Exercises
+      </ThemedText>
+      <View style={styles.searchContainer}>
+        <IconSymbol
+          name="magnifyingglass"
+          size={20}
+          color={Colors[colorScheme ?? 'light'].text}
+          style={styles.searchIcon}
+        />
+        <TextInput
+          style={[styles.searchBar, { color: Colors[colorScheme ?? 'light'].text }]}
+          placeholder="Search for an exercise..."
+          placeholderTextColor={Colors[colorScheme ?? 'light'].text}
+          value={search}
+          onChangeText={setSearch}
+        />
+        {search ? (
+          <TouchableOpacity onPress={() => setSearch('')}>
+            <IconSymbol name="xmark.circle.fill" size={20} color="#888" />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      {loading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <FlatList
+          data={exercises}
+          keyExtractor={(item) => item.exerciseId}
+          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          renderItem={({ item }) => (
+            <Link
+              href={{
+                pathname: '/exercise/[exerciseId]',
+                params: { ...item },
+              }}
+              asChild>
+              <TouchableOpacity style={styles.exerciseContainer}>
+                <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                <View style={styles.exerciseDetails}>
+                  <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
+                  <ThemedText style={styles.exerciseBodyPart}>
+                    {toTitleCase(item.bodyParts.join(', '))}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            </Link>
+          )}
+        />
+      )}
+    </ThemedView>
   );
 }
 
