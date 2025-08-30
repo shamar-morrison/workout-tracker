@@ -20,6 +20,7 @@ const MAPPING = {
   'clock.arrow.circlepath': 'history',
   'dumbbell.fill': 'fitness-center',
   'list.bullet': 'list',
+  'magnifyingglass': 'search',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
 } as IconMapping;

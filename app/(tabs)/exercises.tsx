@@ -1,29 +1,50 @@
-import React from 'react';
-import { ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
+import React from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ExercisesScreen() {
   const [exercises, setExercises] = React.useState<Exercise[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [search, setSearch] = React.useState('');
+  const colorScheme = useColorScheme();
+  const isInitialMount = React.useRef(true);
+
+  const getExercises = async (limit: number, query: string) => {
+    setLoading(true);
+    try {
+      const data = await fetchExercises(limit, query);
+      setExercises(data);
+    } catch (error) {
+      // Handle error appropriately
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    const getExercises = async () => {
-      try {
-        const data = await fetchExercises();
-        setExercises(data);
-      } catch (error) {
-        // Handle error appropriately, e.g., show a message to the user
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getExercises();
+    getExercises(25, '');
   }, []);
+
+  React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const handler = setTimeout(() => {
+      getExercises(25, search);
+    }, 500); // Debounce search
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,6 +52,21 @@ export default function ExercisesScreen() {
         <ThemedText type="title" style={styles.title}>
           Exercises
         </ThemedText>
+        <View style={styles.searchContainer}>
+          <IconSymbol
+            name="magnifyingglass"
+            size={20}
+            color={Colors[colorScheme ?? 'light'].text}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[styles.searchBar, { color: Colors[colorScheme ?? 'light'].text }]}
+            placeholder="Search for an exercise..."
+            placeholderTextColor={Colors[colorScheme ?? 'light'].text}
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
         {loading ? (
           <ActivityIndicator size="large" />
         ) : (
@@ -57,6 +93,23 @@ const styles = StyleSheet.create({
   },
   title: {
     padding: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
   },
   exerciseContainer: {
     padding: 16,

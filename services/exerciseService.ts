@@ -11,9 +11,20 @@ export interface Exercise {
   instructions: string[];
 }
 
-export const fetchExercises = async (): Promise<Exercise[]> => {
+export const fetchExercises = async (
+  limit = 10,
+  search = ''
+): Promise<Exercise[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/exercises`);
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+    });
+
+    if (search) {
+      params.append('search', search);
+    }
+
+    const response = await fetch(`${BASE_URL}/exercises?${params.toString()}`);
     if (!response.ok) {
       throw new Error('Failed to fetch exercises');
     }
