@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
@@ -51,6 +51,13 @@ export default function TabLayout() {
         name="exercises"
         options={{
           title: 'Exercises',
+          headerShown: true,
+          headerSearchBarOptions: {
+            placeholder: 'Search for an exercise...',
+            onChangeText: (event) => {
+              router.setParams({ q: event.nativeEvent.text });
+            },
+          },
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
         }}
       />

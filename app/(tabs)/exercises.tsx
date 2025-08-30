@@ -1,34 +1,29 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const toTitleCase = (str: string) => {
+  if (!str) return '';
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
 export default function ExercisesScreen() {
   const [exercises, setExercises] = React.useState<Exercise[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [search, setSearch] = React.useState('');
-  const colorScheme = useColorScheme();
-  const isInitialMount = React.useRef(true);
+  const params = useLocalSearchParams<{ q: string }>();
+  const searchQuery = params.q || '';
 
-  const getExercises = async (limit: number, query: string) => {
+  const getExercises = React.useCallback(async (limit: number, query: string) => {
     setLoading(true);
     try {
       const data = await fetchExercises(limit, query);
@@ -38,61 +33,26 @@ export default function ExercisesScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  React.useEffect(() => {
-    getExercises(25, '');
   }, []);
 
   React.useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
     const handler = setTimeout(() => {
-      getExercises(25, search);
-    }, 500); // Debounce search
+      getExercises(25, searchQuery);
+    }, 250); // Debounce search
 
     return () => {
       clearTimeout(handler);
     };
-  }, [search]);
-
-  const insets = useSafeAreaInsets();
+  }, [searchQuery, getExercises]);
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={[styles.title, { marginTop: insets.top }]}>
-        Exercises
-      </ThemedText>
-      <View style={styles.searchContainer}>
-        <IconSymbol
-          name="magnifyingglass"
-          size={20}
-          color={Colors[colorScheme ?? 'light'].text}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={[styles.searchBar, { color: Colors[colorScheme ?? 'light'].text }]}
-          placeholder="Search for an exercise..."
-          placeholderTextColor={Colors[colorScheme ?? 'light'].text}
-          value={search}
-          onChangeText={setSearch}
-        />
-        {search ? (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <IconSymbol name="xmark.circle.fill" size={20} color="#888" />
-          </TouchableOpacity>
-        ) : null}
-      </View>
       {loading ? (
         <ActivityIndicator size="large" />
       ) : (
         <FlatList
           data={exercises}
           keyExtractor={(item) => item.exerciseId}
-          contentContainerStyle={{ paddingBottom: insets.bottom }}
           renderItem={({ item }) => (
             <Link
               href={{
@@ -120,26 +80,6 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  title: {
-    padding: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchBar: {
-    flex: 1,
-    height: 40,
   },
   exerciseContainer: {
     padding: 16,
