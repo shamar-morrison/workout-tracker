@@ -1,18 +1,22 @@
+import { ExpoContextMenu } from '@appandflow/expo-context-menu';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
 import {
-    Platform,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Keyboard,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import SimpleMenu from './SimpleMenu';
 
 type IconProps = {
   name: keyof typeof Ionicons.glyphMap;
@@ -21,28 +25,92 @@ type IconProps = {
   color?: string;
 };
 
+type MenuItem = {
+  title: string;
+  onPress: () => void;
+  icon?: React.ReactElement;
+  destructive?: boolean;
+};
+
 type HeaderProps = {
   title: string;
   showBackButton?: boolean;
   rightIcons?: IconProps[];
-  searchQuery?: string;
+  enableSearch?: boolean;
+  initialQuery?: string;
   onSearchQueryChange?: (text: string) => void;
-  isSearchActive: boolean;
-  setIsSearchActive: (isActive: boolean) => void;
+  resetOnBlurWhenEmpty?: boolean;
+  debounceMs?: number;
+  searchPlaceholder?: string;
+  onSearchToggle?: (active: boolean) => void;
+  menuItems?: MenuItem[];
+  menuOpenOnTap?: boolean;
+  children?: React.ReactNode;
 };
 
 export default function CustomHeader({
   title,
   showBackButton = false,
   rightIcons,
-  searchQuery,
+  enableSearch = false,
+  initialQuery = '',
   onSearchQueryChange,
-  isSearchActive,
-  setIsSearchActive,
+  resetOnBlurWhenEmpty = true,
+  debounceMs = 250,
+  searchPlaceholder = 'Search...',
+  onSearchToggle,
+  menuItems,
+  menuOpenOnTap = false,
+  children,
 }: HeaderProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+
+  const [isSearchActive, setIsSearchActive] = React.useState(false);
+  const [query, setQuery] = React.useState(initialQuery);
+  const isKeyboardVisible = React.useRef(false);
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [menuVisible, setMenuVisible] = React.useState(false);
+  const menuIconRef = React.useRef<View>(null);
+  const [menuAnchorY, setMenuAnchorY] = React.useState<number | undefined>(undefined);
+
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => {
+      isKeyboardVisible.current = true;
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      isKeyboardVisible.current = false;
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (resetOnBlurWhenEmpty && query === '') {
+          setIsSearchActive(false);
+          if (onSearchToggle) onSearchToggle(false);
+          Keyboard.dismiss();
+          setMenuVisible(false);
+        }
+      };
+    }, [resetOnBlurWhenEmpty, query, onSearchToggle])
+  );
+
+  React.useEffect(() => {
+    if (!enableSearch || !onSearchQueryChange) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onSearchQueryChange(query);
+    }, debounceMs);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, debounceMs, enableSearch, onSearchQueryChange]);
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -50,16 +118,24 @@ export default function CustomHeader({
     }
   };
 
-  const defaultRightIcons: IconProps[] = [
-    {
+  const combinedRightIcons: IconProps[] = [];
+  if (enableSearch) {
+    combinedRightIcons.push({
       name: 'search',
       onPress: () => {
-        setIsSearchActive(!isSearchActive);
+        setIsSearchActive((prev) => {
+          const next = !prev;
+          if (onSearchToggle) onSearchToggle(next);
+          return next;
+        });
       },
-    },
-  ];
+    });
+  }
+  if (rightIcons && rightIcons.length > 0) {
+    combinedRightIcons.push(...rightIcons);
+  }
 
-  const allRightIcons = [...defaultRightIcons, ...(rightIcons || [])];
+  const shouldDeactivateOnOutsidePress = enableSearch && isSearchActive && !isKeyboardVisible.current && query === '';
 
   return (
     <SafeAreaView style={[styles.headerContainer, { backgroundColor: colors.background }]}>
@@ -72,7 +148,7 @@ export default function CustomHeader({
           )}
           {!isSearchActive && <Text style={[styles.title, { color: colors.text }]}>{title}</Text>}
         </View>
-        {isSearchActive && onSearchQueryChange ? (
+        {enableSearch && isSearchActive ? (
           <View style={styles.searchContainer}>
             <TextInput
               style={[
@@ -83,33 +159,73 @@ export default function CustomHeader({
                   borderColor: colors.icon,
                 },
               ]}
-              placeholder="Search..."
+              placeholder={searchPlaceholder}
               placeholderTextColor={colors.icon}
-              value={searchQuery}
-              onChangeText={onSearchQueryChange}
+              value={query}
+              onChangeText={setQuery}
               autoFocus
+              returnKeyType="search"
             />
-            {searchQuery ? (
-              <TouchableOpacity
-                onPress={() => onSearchQueryChange('')}
-                style={styles.clearButton}>
+            {query ? (
+              <TouchableOpacity onPress={() => setQuery('')} style={styles.clearButton}>
                 <Ionicons name="close-circle" size={20} color={colors.icon} />
               </TouchableOpacity>
             ) : null}
           </View>
         ) : null}
         <View style={styles.rightContainer}>
-          {allRightIcons.map((icon, index) => (
+          {combinedRightIcons.map((icon, index) => (
             <TouchableOpacity key={index} onPress={icon.onPress} style={styles.icon}>
-              <Ionicons
-                name={icon.name}
-                size={icon.size || 24}
-                color={icon.color || colors.text}
-              />
+              <Ionicons name={icon.name} size={icon.size || 24} color={icon.color || colors.text} />
             </TouchableOpacity>
           ))}
+          {menuItems && menuItems.length > 0 ? (
+            menuOpenOnTap ? (
+              <TouchableOpacity
+                style={styles.icon}
+                onPress={() => {
+                  menuIconRef.current?.measureInWindow((_x, y, _w, h) => {
+                    setMenuAnchorY(y + h + 8);
+                    setMenuVisible(true);
+                  });
+                }}
+                ref={menuIconRef as any}
+              >
+                <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
+                <SimpleMenu
+                  visible={menuVisible}
+                  onClose={() => setMenuVisible(false)}
+                  items={menuItems.map(({ title, onPress, destructive, icon }) => ({ title, onPress, destructive, icon }))}
+                  anchorY={menuAnchorY}
+                />
+              </TouchableOpacity>
+            ) : (
+              <ExpoContextMenu
+                menuItems={menuItems.map((m) => ({ title: m.title, onPress: m.onPress, icon: m.icon, destructive: m.destructive }))}
+              >
+                <View style={styles.icon}>
+                  <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
+                </View>
+              </ExpoContextMenu>
+            )
+          ) : null}
         </View>
       </View>
+
+      {children ? (
+        <Pressable
+          style={{ flex: 1 }}
+          onPress={() => {
+            if (isKeyboardVisible.current) {
+              Keyboard.dismiss();
+            } else if (shouldDeactivateOnOutsidePress) {
+              setIsSearchActive(false);
+              if (onSearchToggle) onSearchToggle(false);
+            }
+          }}>
+          <View style={{ flex: 1 }}>{children}</View>
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -118,16 +234,12 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingTop: Platform.OS === 'android' ? 30 : 20,
     paddingBottom: 5,
-    // Shadow for iOS
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 1.84,
-    // Shadow for Android
     elevation: 2,
+    flex: 1,
   },
   container: {
     height: 60,

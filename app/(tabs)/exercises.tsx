@@ -1,10 +1,9 @@
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Keyboard,
-  Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -14,6 +13,7 @@ import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 const toTitleCase = (str: string) => {
@@ -25,10 +25,6 @@ export default function ExercisesScreen() {
   const [exercises, setExercises] = React.useState<Exercise[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [isSearchActive, setIsSearchActive] = React.useState(false);
-  const isKeyboardVisible = React.useRef(false);
-  const searchQueryRef = React.useRef(searchQuery);
-  searchQueryRef.current = searchQuery;
 
   const getExercises = React.useCallback(async (limit: number, query: string) => {
     setLoading(true);
@@ -45,60 +41,31 @@ export default function ExercisesScreen() {
   React.useEffect(() => {
     const handler = setTimeout(() => {
       getExercises(25, searchQuery);
-    }, 250); // Debounce search
+    }, 250);
 
     return () => {
       clearTimeout(handler);
     };
   }, [searchQuery, getExercises]);
 
-  React.useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      isKeyboardVisible.current = true;
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      isKeyboardVisible.current = false;
-    });
-
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      return () => {
-        if (searchQueryRef.current === '') {
-          setIsSearchActive(false);
-          Keyboard.dismiss();
-        }
-      };
-    }, [])
-  );
-
   return (
-    <>
-      <CustomHeader
-        title="Exercises"
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        isSearchActive={isSearchActive}
-        setIsSearchActive={setIsSearchActive}
-      />
+    <CustomHeader
+      title="Exercises"
+      enableSearch
+      searchPlaceholder="Search for an exercise..."
+      initialQuery={searchQuery}
+      onSearchQueryChange={setSearchQuery}
+      menuOpenOnTap
+      menuItems={[{
+        title: 'Create Exercise',
+        onPress: () => router.push('/exercise/create'),
+        icon: <Ionicons name="add-circle-outline" size={18} color="#111" />,
+      }]}>
       <ThemedView style={styles.container}>
         {loading ? (
           <ActivityIndicator size="large" />
         ) : (
-          <Pressable
-            style={{ flex: 1 }}
-            onPress={() => {
-              if (isKeyboardVisible.current) {
-                Keyboard.dismiss();
-              } else if (isSearchActive && searchQueryRef.current === '') {
-                setIsSearchActive(false);
-              }
-            }}>
+          <View style={{ flex: 1 }}>
             <FlatList
               keyboardDismissMode="on-drag"
               keyboardShouldPersistTaps="handled"
@@ -124,10 +91,10 @@ export default function ExercisesScreen() {
                 </TouchableOpacity>
               )}
             />
-          </Pressable>
+          </View>
         )}
       </ThemedView>
-    </>
+    </CustomHeader>
   );
 }
 
