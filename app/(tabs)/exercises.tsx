@@ -1,12 +1,15 @@
+import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import { Image } from 'expo-image';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useFocusEffect } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -20,8 +23,11 @@ const toTitleCase = (str: string) => {
 export default function ExercisesScreen() {
   const [exercises, setExercises] = React.useState<Exercise[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const params = useLocalSearchParams<{ q: string }>();
-  const searchQuery = params.q || '';
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [isSearchActive, setIsSearchActive] = React.useState(false);
+  const isKeyboardVisible = React.useRef(false);
+  const searchQueryRef = React.useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
 
   const getExercises = React.useCallback(async (limit: number, query: string) => {
     setLoading(true);
@@ -45,35 +51,82 @@ export default function ExercisesScreen() {
     };
   }, [searchQuery, getExercises]);
 
+  React.useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      isKeyboardVisible.current = true;
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      isKeyboardVisible.current = false;
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        if (searchQueryRef.current === '') {
+          setIsSearchActive(false);
+          Keyboard.dismiss();
+        }
+      };
+    }, [])
+  );
+
+  const shouldShowDismissOverlay = isSearchActive && !isKeyboardVisible.current && searchQueryRef.current === '';
+
   return (
-    <ThemedView style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <FlatList
-          data={exercises}
-          keyExtractor={(item) => item.exerciseId}
-          renderItem={({ item }) => (
-            <Link
-              href={{
-                pathname: '/exercise/[exerciseId]',
-                params: { ...item },
-              }}
-              asChild>
-              <TouchableOpacity style={styles.exerciseContainer}>
-                <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
-                <View style={styles.exerciseDetails}>
-                  <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
-                  <ThemedText style={styles.exerciseBodyPart}>
-                    {toTitleCase(item.bodyParts.join(', '))}
-                  </ThemedText>
-                </View>
-              </TouchableOpacity>
-            </Link>
-          )}
-        />
-      )}
-    </ThemedView>
+    <>
+      <CustomHeader
+        title="Exercises"
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        isSearchActive={isSearchActive}
+        setIsSearchActive={setIsSearchActive}
+      />
+      <ThemedView style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <View style={{ flex: 1 }}>
+            <FlatList
+              keyboardDismissMode="on-drag"
+              data={exercises}
+              keyExtractor={(item) => item.exerciseId}
+              renderItem={({ item }) => (
+                <Link
+                  href={{
+                    pathname: '/exercise/[exerciseId]',
+                    params: { ...item },
+                  }}
+                  asChild>
+                  <TouchableOpacity style={styles.exerciseContainer}>
+                    <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                    <View style={styles.exerciseDetails}>
+                      <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
+                      <ThemedText style={styles.exerciseBodyPart}>
+                        {toTitleCase(item.bodyParts.join(', '))}
+                      </ThemedText>
+                    </View>
+                  </TouchableOpacity>
+                </Link>
+              )}
+            />
+            {shouldShowDismissOverlay ? (
+              <Pressable
+                style={styles.dismissOverlay}
+                onPress={() => {
+                  setIsSearchActive(false);
+                }}
+              />
+            ) : null}
+          </View>
+        )}
+      </ThemedView>
+    </>
   );
 }
 
@@ -104,5 +157,8 @@ const styles = StyleSheet.create({
   exerciseBodyPart: {
     fontSize: 14,
     color: '#888',
+  },
+  dismissOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
 });
