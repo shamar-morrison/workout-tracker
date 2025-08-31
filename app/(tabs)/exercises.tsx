@@ -1,9 +1,4 @@
-import CustomHeader from '@/components/CustomHeader';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Exercise, fetchExercises } from '@/services/exerciseService';
-import { Image } from 'expo-image';
-import { Link, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -14,6 +9,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+import CustomHeader from '@/components/CustomHeader';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Exercise, fetchExercises } from '@/services/exerciseService';
+import { Image } from 'expo-image';
 
 const toTitleCase = (str: string) => {
   if (!str) return '';
@@ -76,8 +77,6 @@ export default function ExercisesScreen() {
     }, [])
   );
 
-  const shouldShowDismissOverlay = isSearchActive && !isKeyboardVisible.current && searchQueryRef.current === '';
-
   return (
     <>
       <CustomHeader
@@ -91,39 +90,41 @@ export default function ExercisesScreen() {
         {loading ? (
           <ActivityIndicator size="large" />
         ) : (
-          <View style={{ flex: 1 }}>
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => {
+              if (isKeyboardVisible.current) {
+                Keyboard.dismiss();
+              } else if (isSearchActive && searchQueryRef.current === '') {
+                setIsSearchActive(false);
+              }
+            }}>
             <FlatList
               keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
               data={exercises}
               keyExtractor={(item) => item.exerciseId}
               renderItem={({ item }) => (
-                <Link
-                  href={{
-                    pathname: '/exercise/[exerciseId]',
-                    params: { ...item },
+                <TouchableOpacity
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    router.push({
+                      pathname: '/exercise/[exerciseId]',
+                      params: { ...item },
+                    });
                   }}
-                  asChild>
-                  <TouchableOpacity style={styles.exerciseContainer}>
-                    <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
-                    <View style={styles.exerciseDetails}>
-                      <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
-                      <ThemedText style={styles.exerciseBodyPart}>
-                        {toTitleCase(item.bodyParts.join(', '))}
-                      </ThemedText>
-                    </View>
-                  </TouchableOpacity>
-                </Link>
+                  style={styles.exerciseContainer}>
+                  <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                  <View style={styles.exerciseDetails}>
+                    <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
+                    <ThemedText style={styles.exerciseBodyPart}>
+                      {toTitleCase(item.bodyParts.join(', '))}
+                    </ThemedText>
+                  </View>
+                </TouchableOpacity>
               )}
             />
-            {shouldShowDismissOverlay ? (
-              <Pressable
-                style={styles.dismissOverlay}
-                onPress={() => {
-                  setIsSearchActive(false);
-                }}
-              />
-            ) : null}
-          </View>
+          </Pressable>
         )}
       </ThemedView>
     </>
@@ -157,8 +158,5 @@ const styles = StyleSheet.create({
   exerciseBodyPart: {
     fontSize: 14,
     color: '#888',
-  },
-  dismissOverlay: {
-    ...StyleSheet.absoluteFillObject,
   },
 });
