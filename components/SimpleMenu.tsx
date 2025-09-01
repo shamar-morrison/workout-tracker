@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type SimpleMenuItem = {
@@ -7,6 +7,10 @@ export type SimpleMenuItem = {
   onPress: () => void;
   destructive?: boolean;
   icon?: React.ReactElement;
+  confirmTitle?: string;
+  confirmMessage?: string;
+  confirmCancelText?: string;
+  confirmConfirmText?: string;
 };
 
 type Props = {
@@ -31,7 +35,24 @@ export default function SimpleMenu({ visible, onClose, items, anchorY }: Props) 
               style={styles.menuItem}
               onPress={() => {
                 onClose();
-                setTimeout(() => item.onPress(), 0);
+                const run = () => item.onPress();
+                if (item.destructive || item.confirmTitle || item.confirmMessage) {
+                  setTimeout(
+                    () =>
+                      Alert.alert(
+                        item.confirmTitle ?? 'Confirm action',
+                        item.confirmMessage ?? 'This action cannot be undone.',
+                        [
+                          { text: item.confirmCancelText ?? 'Cancel', style: 'cancel' },
+                          { text: item.confirmConfirmText ?? 'Confirm', style: 'destructive', onPress: run },
+                        ],
+                        { cancelable: true }
+                      ),
+                    0
+                  );
+                } else {
+                  setTimeout(run, 0);
+                }
               }}>
               {item.icon ? <View style={styles.icon}>{item.icon}</View> : null}
               <Text style={[styles.menuText, item.destructive && styles.destructive]}>{item.title}</Text>
