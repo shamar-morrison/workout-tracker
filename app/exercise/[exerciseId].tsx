@@ -25,6 +25,10 @@ export default function ExerciseDetailScreen() {
     instructions: (params.instructions as string)?.split(',') || [],
   };
 
+  const isCustom = React.useMemo(() => {
+    return (item.exerciseId?.startsWith('local_') ?? false) || (item.gifUrl?.startsWith('letter://') ?? false);
+  }, [item.exerciseId, item.gifUrl]);
+
   const formattedInstructions = React.useMemo(() => {
     if (!item.instructions) {
       return [];
@@ -48,16 +52,18 @@ export default function ExerciseDetailScreen() {
       <Stack.Screen options={{ title: toTitleCase(item.name) }} />
       <ScrollView>
         <View style={styles.innerContainer}>
-          <Image source={{ uri: item.gifUrl }} style={styles.image} />
-          <View style={styles.infoContainer}>
-            <ThemedText type="subtitle">Instructions</ThemedText>
-            {formattedInstructions.map((instruction, index) => (
-              <View key={index} style={styles.instructionContainer}>
-                <ThemedText style={styles.stepNumber}>{`${index + 1}.`}</ThemedText>
-                <ThemedText style={styles.instructionText}>{instruction}</ThemedText>
-              </View>
-            ))}
-          </View>
+          {!isCustom ? <Image source={{ uri: item.gifUrl }} style={styles.image} /> : null}
+          {!isCustom ? (
+            <View style={styles.infoContainer}>
+              <ThemedText type="subtitle">Instructions</ThemedText>
+              {formattedInstructions.map((instruction, index) => (
+                <View key={index} style={styles.instructionContainer}>
+                  <ThemedText style={styles.stepNumber}>{`${index + 1}.`}</ThemedText>
+                  <ThemedText style={styles.instructionText}>{instruction}</ThemedText>
+                </View>
+              ))}
+            </View>
+          ) : null}
           <View style={styles.infoContainer}>
             <ThemedText type="subtitle">Target Muscles</ThemedText>
             <ThemedText>{item.targetMuscles?.join(', ')}</ThemedText>
@@ -66,10 +72,12 @@ export default function ExerciseDetailScreen() {
             <ThemedText type="subtitle">Secondary Muscles</ThemedText>
             <ThemedText>{item.secondaryMuscles?.join(', ')}</ThemedText>
           </View>
-          <View style={styles.infoContainer}>
-            <ThemedText type="subtitle">Equipment</ThemedText>
-            <ThemedText>{item.equipments?.join(', ')}</ThemedText>
-          </View>
+          {!isCustom ? (
+            <View style={styles.infoContainer}>
+              <ThemedText type="subtitle">Equipment</ThemedText>
+              <ThemedText>{item.equipments?.join(', ')}</ThemedText>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </ThemedView>
