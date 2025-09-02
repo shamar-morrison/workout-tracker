@@ -20,7 +20,6 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
           },
           default: {},
@@ -30,6 +29,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          headerShown: true,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />,
         }}
       />
@@ -37,6 +37,7 @@ export default function TabLayout() {
         name="history"
         options={{
           title: 'History',
+          headerShown: true,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock.arrow.circlepath" color={color} />,
         }}
       />
@@ -44,6 +45,7 @@ export default function TabLayout() {
         name="workouts"
         options={{
           title: 'Workouts',
+          headerShown: true,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="dumbbell.fill" color={color} />,
         }}
       />
@@ -51,6 +53,7 @@ export default function TabLayout() {
         name="exercises"
         options={{
           title: 'Exercises',
+          headerShown: false,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
         }}
       />
