@@ -1,25 +1,37 @@
 import { router } from 'expo-router';
 import React from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  Keyboard,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Keyboard,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 const toTitleCase = (str: string) => {
   if (!str) return '';
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
+
+function ExerciseAvatar({ exercise }: { exercise: Exercise }) {
+  if (exercise.gifUrl?.startsWith('letter://')) {
+    const letter = exercise.gifUrl.replace('letter://', '').slice(0, 1) || 'X';
+    return (
+      <View style={styles.letterAvatar}>
+        <Text style={styles.letterText}>{letter}</Text>
+      </View>
+    );
+  }
+  return <Image source={{ uri: exercise.gifUrl }} style={styles.exerciseImage} />;
+}
 
 export default function ExercisesScreen() {
   const [exercises, setExercises] = React.useState<Exercise[]>([]);
@@ -32,7 +44,6 @@ export default function ExercisesScreen() {
       const data = await fetchExercises(limit, query);
       setExercises(data);
     } catch (error) {
-      // Handle error appropriately
     } finally {
       setLoading(false);
     }
@@ -59,7 +70,6 @@ export default function ExercisesScreen() {
       menuItems={[{
         title: 'Create Exercise',
         onPress: () => router.push('/exercise/create'),
-        icon: <Ionicons name="add-circle-outline" size={18} color="#111" />,
       }]}>
       <ThemedView style={styles.container}>
         {loading ? (
@@ -81,7 +91,7 @@ export default function ExercisesScreen() {
                     });
                   }}
                   style={styles.exerciseContainer}>
-                  <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                  <ExerciseAvatar exercise={item} />
                   <View style={styles.exerciseDetails}>
                     <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
                     <ThemedText style={styles.exerciseBodyPart}>
@@ -114,6 +124,21 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     marginRight: 16,
+    borderRadius: 8,
+  },
+  letterAvatar: {
+    width: 50,
+    height: 50,
+    marginRight: 16,
+    borderRadius: 8,
+    backgroundColor: '#0a7ea4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  letterText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
   },
   exerciseDetails: {
     flex: 1,
