@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
 import SimpleMenu from '@/components/SimpleMenu';
@@ -39,6 +39,31 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
     onUpdate({ ...item, sets: [...item.sets, { weight: '', reps: '', completed: false }] });
   };
 
+  const hasData = React.useMemo(() => {
+    return item.sets.some((s) => {
+      const weightHas = /\d/.test((s.weight ?? '').trim());
+      const repsHas = /\d/.test((s.reps ?? '').trim());
+      const completedHas = !!s.completed;
+      return weightHas || repsHas || completedHas;
+    });
+  }, [item.sets]);
+
+  const requestRemove = () => {
+    if (hasData) {
+      Alert.alert(
+        'Remove exercise?',
+        'This will delete any recorded sets for this exercise.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Remove', style: 'destructive', onPress: onRemove },
+        ],
+        { cancelable: true }
+      );
+    } else {
+      onRemove();
+    }
+  };
+
   return (
     <View style={[cardStyles.cardContainer, { backgroundColor: colors.background }]}>
       <View style={cardStyles.headerRow}>
@@ -58,7 +83,15 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
         <SimpleMenu
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
-          items={[{ title: 'Remove exercise', destructive: true, onPress: onRemove }]}
+          items={[{
+            title: 'Remove exercise',
+            destructive: hasData,
+            onPress: onRemove,
+            confirmTitle: hasData ? 'Remove exercise?' : undefined,
+            confirmMessage: hasData ? 'This will delete any recorded sets for this exercise.' : undefined,
+            confirmConfirmText: hasData ? 'Remove' : undefined,
+            confirmCancelText: hasData ? 'Cancel' : undefined,
+          }]}
           anchorY={menuAnchorY}
         />
       </View>
