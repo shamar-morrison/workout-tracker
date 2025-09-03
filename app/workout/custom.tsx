@@ -248,12 +248,12 @@ export default function CustomWorkoutScreen() {
               const selected = pickerData.filter((e) => pickerSelected.has(e.exerciseId));
               const now = Date.now();
               setExercises((prev) => [
+                ...prev,
                 ...selected.map((e, i) => ({
                   id: `${e.exerciseId}_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
                   exercise: e,
                   sets: [{ weight: '', reps: '', completed: false }],
                 })),
-                ...prev,
               ]);
               setPickerSelected(new Set());
               setPickerVisible(false);
