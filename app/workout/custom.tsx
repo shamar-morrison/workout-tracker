@@ -24,10 +24,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
+import ExerciseCardItem, { WorkoutExercise } from './ExerciseCard';
 
-type WorkoutExercise = {
-  exercise: Exercise;
-};
+// Types moved to ExerciseCard.tsx and re-imported
 
 export default function CustomWorkoutScreen() {
   const colorScheme = useColorScheme();
@@ -145,30 +144,37 @@ export default function CustomWorkoutScreen() {
             multiline
           />
 
-          <TouchableOpacity
-            style={styles.addExercise}
-            onPress={() => setPickerVisible(true)}
-            accessibilityRole="button"
-            activeOpacity={0.8}
-          >
-            <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.cancelWorkout}
-            onPress={handleCancel}
-            accessibilityRole="button"
-            activeOpacity={0.8}
-          >
-            <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
-          </TouchableOpacity>
-
           <FlatList
             data={exercises}
-            keyExtractor={(item) => item.exercise.exerciseId}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={styles.exerciseRow}>
-                <ThemedText style={styles.exerciseName}>{item.exercise.name}</ThemedText>
+              <ExerciseCardItem
+                item={item}
+                onUpdate={(updated) => {
+                  setExercises((prev) => prev.map((ex) => (ex.id === updated.id ? updated : ex)));
+                }}
+                onRemove={() => setExercises((prev) => prev.filter((ex) => ex.id !== item.id))}
+              />
+            )}
+            ListFooterComponent={() => (
+              <View style={{ paddingVertical: 8 }}>
+                <TouchableOpacity
+                  style={styles.addExercise}
+                  onPress={() => setPickerVisible(true)}
+                  accessibilityRole="button"
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.cancelWorkout}
+                  onPress={handleCancel}
+                  accessibilityRole="button"
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -242,7 +248,15 @@ export default function CustomWorkoutScreen() {
             color: colors.tint,
             onPress: () => {
               const selected = pickerData.filter((e) => pickerSelected.has(e.exerciseId));
-              setExercises((prev) => [...selected.map((e) => ({ exercise: e })), ...prev]);
+              const now = Date.now();
+              setExercises((prev) => [
+                ...selected.map((e, i) => ({
+                  id: `${e.exerciseId}_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+                  exercise: e,
+                  sets: [{ weight: '', reps: '', completed: false }],
+                })),
+                ...prev,
+              ]);
               setPickerSelected(new Set());
               setPickerVisible(false);
             },
