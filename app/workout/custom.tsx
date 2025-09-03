@@ -145,11 +145,21 @@ export default function CustomWorkoutScreen() {
             multiline
           />
 
-          <TouchableOpacity style={styles.addExercise} onPress={() => setPickerVisible(true)}>
+          <TouchableOpacity
+            style={styles.addExercise}
+            onPress={() => setPickerVisible(true)}
+            accessibilityRole="button"
+            activeOpacity={0.8}
+          >
             <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.cancelWorkout} onPress={handleCancel}>
+          <TouchableOpacity
+            style={styles.cancelWorkout}
+            onPress={handleCancel}
+            accessibilityRole="button"
+            activeOpacity={0.8}
+          >
             <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
           </TouchableOpacity>
 
@@ -320,25 +330,35 @@ const styles = StyleSheet.create({
   },
   addExercise: {
     alignSelf: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#1e88e5',
+    borderRadius: 10,
+    minWidth: 220,
+    alignItems: 'center',
   },
   addExerciseText: {
-    color: '#1e88e5',
+    color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.25,
   },
   cancelWorkout: {
     alignSelf: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginTop: 8,
-    marginBottom: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 12,
+    marginBottom: 20,
+    backgroundColor: '#c62828',
+    borderRadius: 10,
+    minWidth: 220,
+    alignItems: 'center',
   },
   cancelWorkoutText: {
-    color: '#c62828',
+    color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.25,
   },
   exerciseRow: {
     paddingVertical: 12,
