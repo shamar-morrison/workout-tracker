@@ -44,6 +44,7 @@ type HeaderProps = {
   showBackButton?: boolean;
   rightIcons?: IconProps[];
   rightTextButton?: RightTextButton;
+  onBackPress?: () => void;
   enableSearch?: boolean;
   initialQuery?: string;
   onSearchQueryChange?: (text: string) => void;
@@ -61,6 +62,7 @@ export default function CustomHeader({
   showBackButton = false,
   rightIcons,
   rightTextButton,
+  onBackPress,
   enableSearch = false,
   initialQuery = '',
   onSearchQueryChange,
@@ -122,6 +124,10 @@ export default function CustomHeader({
   }, [query, debounceMs, enableSearch, onSearchQueryChange]);
 
   const handleBack = () => {
+    if (onBackPress) {
+      onBackPress();
+      return;
+    }
     if (router.canGoBack()) {
       router.back();
     }

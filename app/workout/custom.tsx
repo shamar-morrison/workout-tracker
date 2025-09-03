@@ -1,17 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
 import {
-    Alert,
-    FlatList,
-    Keyboard,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Keyboard,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import CustomHeader from '@/components/CustomHeader';
@@ -41,6 +45,7 @@ export default function CustomWorkoutScreen() {
   const [search, setSearch] = React.useState('');
   const [pickerData, setPickerData] = React.useState<Exercise[]>([]);
   const [pickerLoading, setPickerLoading] = React.useState(false);
+  const [pickerSelected, setPickerSelected] = React.useState<Set<string>>(new Set());
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -53,11 +58,24 @@ export default function CustomWorkoutScreen() {
 
   React.useEffect(() => {
     if (!pickerVisible) return;
+    let cancelled = false;
     setPickerLoading(true);
     fetchExercises(25, search)
-      .then(setPickerData)
-      .finally(() => setPickerLoading(false));
+      .then((data) => {
+        if (!cancelled) setPickerData(data);
+      })
+      .finally(() => {
+        if (!cancelled) setPickerLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [pickerVisible, search]);
+
+  const toTitleCase = React.useCallback((str: string) => {
+    if (!str) return '';
+    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+  }, []);
 
   const formattedTime = React.useMemo(() => {
     const h = Math.floor(seconds / 3600)
@@ -84,7 +102,15 @@ export default function CustomWorkoutScreen() {
   };
 
   const handleFinish = () => {
-    // For now, simply end and go back. In a real app, persist data.
+    if (exercises.length === 0) {
+      const message = 'Please add at least one exercise before finishing.';
+      if (Platform.OS === 'android') {
+        ToastAndroid.show(message, ToastAndroid.SHORT);
+      } else {
+        Alert.alert('Add at least one exercise', message);
+      }
+      return;
+    }
     setEndTime(Date.now());
     router.back();
   };
@@ -142,9 +168,9 @@ export default function CustomWorkoutScreen() {
       {/* Edit details sheet */}
       <Modal visible={editSheetVisible} transparent animationType="slide" onRequestClose={() => setEditSheetVisible(false)}>
         <Pressable style={styles.sheetBackdrop} onPress={() => setEditSheetVisible(false)}>
-          <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
-            <Text style={styles.sheetTitle}>Edit details</Text>
-            <Text style={styles.label}>Name</Text>
+          <Pressable style={[styles.sheet, { backgroundColor: colors.background }]} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.sheetTitle, { color: colors.text }]}>Edit details</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Name</Text>
             <TextInput
               style={[styles.textInput, { color: colors.text, borderColor: colors.icon }]}
               value={name}
@@ -153,7 +179,7 @@ export default function CustomWorkoutScreen() {
               placeholderTextColor={colors.icon}
             />
             <View style={{ height: 10 }} />
-            <Text style={styles.label}>Start time</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Start time</Text>
             <TextInput
               style={[styles.textInput, { color: colors.text, borderColor: colors.icon }]}
               value={new Date(startTime).toLocaleString()}
@@ -161,7 +187,7 @@ export default function CustomWorkoutScreen() {
               editable={false}
             />
             <View style={{ height: 10 }} />
-            <Text style={styles.label}>End time</Text>
+            <Text style={[styles.label, { color: colors.text }]}>End time</Text>
             <TextInput
               style={[styles.textInput, { color: colors.text, borderColor: colors.icon }]}
               value={endTime ? new Date(endTime).toLocaleString() : 'Not set'}
@@ -185,47 +211,83 @@ export default function CustomWorkoutScreen() {
         </Pressable>
       </Modal>
 
-      {/* Exercise picker */}
-      <Modal visible={pickerVisible} transparent animationType="slide" onRequestClose={() => setPickerVisible(false)}>
-        <View style={styles.pickerBackdrop}>
-          <View style={styles.pickerSheet}>
-            <View style={styles.pickerHeader}>
-              <TextInput
-                style={[styles.searchInput, { color: colors.text, borderColor: colors.icon }]}
-                placeholder="Search for an exercise..."
-                placeholderTextColor={colors.icon}
-                value={search}
-                onChangeText={setSearch}
-                autoFocus
+      {/* Exercise picker - full screen with search, gifs, multi-select */}
+      <Modal visible={pickerVisible} animationType="slide" onRequestClose={() => setPickerVisible(false)}>
+        <CustomHeader
+          title="Add exercises"
+          showBackButton
+          onBackPress={() => setPickerVisible(false)}
+          enableSearch
+          searchPlaceholder="Search for an exercise..."
+          initialQuery={search}
+          onSearchQueryChange={setSearch}
+          menuOpenOnTap
+          menuItems={[{
+            title: 'Create Exercise',
+            onPress: () => router.push('/exercise/create'),
+          }]}
+          rightTextButton={{
+            label: `ADD (${pickerSelected.size})`,
+            disabled: pickerSelected.size === 0,
+            color: colors.tint,
+            onPress: () => {
+              const selected = pickerData.filter((e) => pickerSelected.has(e.exerciseId));
+              setExercises((prev) => [...selected.map((e) => ({ exercise: e })), ...prev]);
+              setPickerSelected(new Set());
+              setPickerVisible(false);
+            },
+          }}
+        >
+          <ThemedView style={styles.container}>
+            {pickerLoading ? (
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <ActivityIndicator size="large" color={colors.tint} />
+              </View>
+            ) : (
+              <FlatList
+                keyboardDismissMode="on-drag"
+                keyboardShouldPersistTaps="handled"
+                data={pickerData}
+                keyExtractor={(item) => item.exerciseId}
+                renderItem={({ item }) => {
+                  const isSelected = pickerSelected.has(item.exerciseId);
+                  const isLetter = item.gifUrl?.startsWith('letter://');
+                  const letter = isLetter ? item.gifUrl.replace('letter://', '').slice(0, 1) || 'X' : 'X';
+                  const selectedBg = (colorScheme === 'dark') ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setPickerSelected((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(item.exerciseId)) next.delete(item.exerciseId);
+                          else next.add(item.exerciseId);
+                          return next;
+                        });
+                      }}
+                      style={[styles.exerciseContainer, isSelected && { backgroundColor: selectedBg }]}
+                    >
+                      <View style={styles.imageWrapper}>
+                        {isSelected ? (
+                          <Ionicons name="checkmark" size={28} color={colors.tint} />
+                        ) : isLetter ? (
+                          <View style={styles.letterAvatar}>
+                            <Text style={styles.letterText}>{letter}</Text>
+                          </View>
+                        ) : (
+                          <Image source={{ uri: item.gifUrl }} style={styles.exerciseImage} />
+                        )}
+                      </View>
+                      <View style={styles.exerciseDetails}>
+                        <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
+                        <ThemedText style={styles.exerciseBodyPart}>{toTitleCase(item.bodyParts?.join(', ') || '')}</ThemedText>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
               />
-              <TouchableOpacity onPress={() => setPickerVisible(false)}>
-                <Text style={{ color: '#8a8a8a', fontSize: 16 }}>Close</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              keyboardDismissMode="on-drag"
-              keyboardShouldPersistTaps="handled"
-              data={pickerData}
-              ListEmptyComponent={() => (
-                <View style={{ padding: 20 }}>
-                  <Text style={{ color: '#8a8a8a' }}>{pickerLoading ? 'Loading…' : 'No results'}</Text>
-                </View>
-              )}
-              keyExtractor={(item) => item.exerciseId}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.pickerRow}
-                  onPress={() => {
-                    setExercises((prev) => [{ exercise: item }, ...prev]);
-                    setPickerVisible(false);
-                  }}
-                >
-                  <Text style={{ color: '#fff', fontSize: 16 }}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
+            )}
+          </ThemedView>
+        </CustomHeader>
       </Modal>
     </ThemedView>
   );
@@ -283,8 +345,51 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#2d2d2d',
   },
+  exerciseContainer: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#2d2d2d',
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageWrapper: {
+    width: 50,
+    height: 50,
+    marginRight: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  exerciseImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+  },
+  letterAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: '#0a7ea4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  letterText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
   exerciseName: {
     fontSize: 16,
+    fontWeight: '700',
+  },
+  exerciseBodyPart: {
+    fontSize: 14,
+    color: '#888',
+  },
+  exerciseDetails: {
+    flex: 1,
   },
   sheetBackdrop: {
     flex: 1,
