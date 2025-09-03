@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 
 import SimpleMenu from '@/components/SimpleMenu';
 import { ThemedText } from '@/components/ThemedText';
@@ -71,7 +72,22 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
       </View>
 
       {item.sets.map((set, idx) => (
-        <View key={idx} style={cardStyles.setRow}>
+        <Swipeable
+          key={idx}
+          renderRightActions={(progress, dragX) => {
+            const translateX = dragX.interpolate({ inputRange: [-100, 0], outputRange: [0, 80], extrapolate: 'clamp' });
+            return (
+              <Animated.View style={[cardStyles.deleteAction, { transform: [{ translateX }] }]}> 
+                <Ionicons name="trash" size={22} color="#fff" />
+              </Animated.View>
+            );
+          }}
+          onSwipeableRightOpen={() => {
+            const next = item.sets.filter((_, i) => i !== idx);
+            onUpdate({ ...item, sets: next });
+          }}
+        >
+        <View style={cardStyles.setRow}>
           <ThemedText style={[cardStyles.setIndex, { width: 40 }]}>
             {idx + 1}
           </ThemedText>
@@ -97,6 +113,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
             <Ionicons name="checkmark" size={18} color={set.completed ? '#fff' : Colors[colorScheme ?? 'light'].icon} />
           </TouchableOpacity>
         </View>
+        </Swipeable>
       ))}
 
       <TouchableOpacity onPress={addSet} style={cardStyles.addSetButton}>
@@ -166,6 +183,14 @@ const cardStyles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#2d2d2d',
+  },
+  deleteAction: {
+    backgroundColor: '#ef5350',
+    width: 88,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 4,
+    borderRadius: 10,
   },
   addSetButton: {
     alignSelf: 'center',
