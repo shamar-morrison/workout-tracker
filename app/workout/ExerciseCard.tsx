@@ -63,10 +63,10 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
       </View>
 
       <View style={cardStyles.headersRow}>
-        <ThemedText style={[cardStyles.headerLabel, { width: 40 }]}>SET</ThemedText>
-        <ThemedText style={[cardStyles.headerLabel, { flex: 1 }]}>PREVIOUS</ThemedText>
-        <ThemedText style={[cardStyles.headerLabel, { width: 90 }]}>LBS</ThemedText>
-        <ThemedText style={[cardStyles.headerLabel, { width: 90 }]}>REPS</ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 40 }]}>SET</ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { flex: 1 }]}>PREVIOUS</ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>LBS</ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>REPS</ThemedText>
         <View style={{ width: 36 }} />
       </View>
 
@@ -77,14 +77,14 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
           </ThemedText>
           <ThemedText style={[cardStyles.previousText, { flex: 1 }]}>—</ThemedText>
           <TextInput
-            style={[cardStyles.numInput, { width: 70 }]}
+            style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
             keyboardType="numeric"
             value={set.weight}
             onChangeText={(t) => handleChangeSet(idx, 'weight', t.replace(/[^0-9.]/g, ''))}
             placeholder=""
           />
           <TextInput
-            style={[cardStyles.numInput, { width: 70 }]}
+            style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
             keyboardType="numeric"
             value={set.reps}
             onChangeText={(t) => handleChangeSet(idx, 'reps', t.replace(/[^0-9]/g, ''))}
@@ -133,7 +133,7 @@ const cardStyles = StyleSheet.create({
   headerLabel: {
     color: '#9BA1A6',
     fontSize: 12,
-    letterSpacing: 2,
+    letterSpacing: 1,
     textAlign: 'left',
   },
   setRow: {
@@ -141,16 +141,15 @@ const cardStyles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    gap: 12,
+    columnGap: 12 as any,
   },
   setIndex: {
-    width: 50,
+    width: 40,
     color: '#1e88e5',
     fontSize: 18,
     fontWeight: '700',
   },
   previousText: {
-    width: 100,
     color: '#9BA1A6',
   },
   numInput: {

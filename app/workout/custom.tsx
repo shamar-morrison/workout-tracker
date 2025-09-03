@@ -26,8 +26,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import ExerciseCardItem, { WorkoutExercise } from './ExerciseCard';
 
-// Types moved to ExerciseCard.tsx and re-imported
-
 export default function CustomWorkoutScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
