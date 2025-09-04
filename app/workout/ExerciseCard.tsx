@@ -8,9 +8,6 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Types moved to context
-// export type WorkoutSet = { weight: string; reps: string; completed: boolean };
-// export type WorkoutExercise = { id: string; exercise: Exercise; sets: WorkoutSet[] };
 import { WorkoutExercise } from '@/context/WorkoutSessionContext';
 
 type ExerciseCardProps = {
