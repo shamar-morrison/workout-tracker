@@ -22,39 +22,55 @@ import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import { useWorkoutSession } from '@/context/WorkoutSessionContext';
+import { useWorkoutSession, WorkoutExercise } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
-import ExerciseCardItem, { WorkoutExercise } from './ExerciseCard';
+import ExerciseCardItem from './ExerciseCard';
 
 export default function CustomWorkoutScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const { session, isActive, start, update, finish } = useWorkoutSession();
 
+  // Local state for name and note is temporary until full sync
   const [name, setName] = React.useState(session.name || 'Custom Workout');
-  const [startTime, setStartTime] = React.useState<number>(() => session.startTime ?? Date.now());
+  const [note, setNote] = React.useState(session.note || '');
+
+  // Timer state is derived from session
   const [endTime, setEndTime] = React.useState<number | null>(null);
-  const [note, setNote] = React.useState('');
   const [seconds, setSeconds] = React.useState(0);
-  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  // UI state for modals/pickers
   const [editSheetVisible, setEditSheetVisible] = React.useState(false);
-  const [exercises, setExercises] = React.useState<WorkoutExercise[]>([]);
   const [pickerVisible, setPickerVisible] = React.useState(false);
+
+  // Picker-related state
   const [search, setSearch] = React.useState('');
   const [pickerData, setPickerData] = React.useState<Exercise[]>([]);
   const [pickerLoading, setPickerLoading] = React.useState(false);
   const [pickerSelected, setPickerSelected] = React.useState<Set<string>>(new Set());
 
-  // Keep timer in sync with session start time so it survives navigation
+  // Ensure a session exists and keep timer ticking from session.startTime
+  React.useEffect(() => {
+    if (!isActive) start(name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync local UI with session state changes
+  React.useEffect(() => {
+    setName(session.name || 'Custom Workout');
+    setNote(session.note || '');
+  }, [session.name, session.note]);
+
   React.useEffect(() => {
     const interval = setInterval(() => {
       const base = endTime ?? Date.now();
-      const delta = Math.max(0, Math.floor((base - (session.startTime ?? startTime)) / 1000));
+      const startAt = session.startTime ?? Date.now();
+      const delta = Math.max(0, Math.floor((base - startAt) / 1000));
       setSeconds(delta);
     }, 1000);
     return () => clearInterval(interval);
-  }, [session.startTime, startTime, endTime]);
+  }, [session.startTime, endTime]);
 
   React.useEffect(() => {
     if (!pickerVisible) return;
@@ -96,13 +112,16 @@ export default function CustomWorkoutScreen() {
       {
         text: 'Cancel workout',
         style: 'destructive',
-        onPress: () => router.back(),
+        onPress: () => {
+          finish();
+          router.back();
+        },
       },
     ]);
   };
 
   const handleFinish = () => {
-    if (exercises.length === 0) {
+    if (session.exercises.length === 0) {
       const message = 'Please add at least one exercise before finishing.';
       if (Platform.OS === 'android') {
         ToastAndroid.show(message, ToastAndroid.SHORT);
@@ -142,20 +161,27 @@ export default function CustomWorkoutScreen() {
             placeholder="Workout note"
             placeholderTextColor={colors.icon}
             value={note}
-            onChangeText={setNote}
+            onChangeText={(text) => {
+              setNote(text);
+              update({ note: text });
+            }}
             multiline
           />
 
           <FlatList
-            data={exercises}
+            data={session.exercises}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <ExerciseCardItem
                 item={item}
                 onUpdate={(updated) => {
-                  setExercises((prev) => prev.map((ex) => (ex.id === updated.id ? updated : ex)));
+                  const nextExercises = session.exercises.map((ex) => (ex.id === updated.id ? updated : ex));
+                  update({ exercises: nextExercises });
                 }}
-                onRemove={() => setExercises((prev) => prev.filter((ex) => ex.id !== item.id))}
+                onRemove={() => {
+                  const nextExercises = session.exercises.filter((ex) => ex.id !== item.id);
+                  update({ exercises: nextExercises });
+                }}
               />
             )}
             ListFooterComponent={() => (
@@ -193,6 +219,7 @@ export default function CustomWorkoutScreen() {
               style={[styles.textInput, { color: colors.text, borderColor: colors.icon }]}
               value={name}
               onChangeText={setName}
+              onEndEditing={() => update({ name })}
               placeholder="Workout name"
               placeholderTextColor={colors.icon}
             />
@@ -200,7 +227,7 @@ export default function CustomWorkoutScreen() {
             <Text style={[styles.label, { color: colors.text }]}>Start time</Text>
             <TextInput
               style={[styles.textInput, { color: colors.text, borderColor: colors.icon }]}
-              value={new Date(startTime).toLocaleString()}
+              value={new Date(session.startTime ?? 0).toLocaleString()}
               onFocus={() => Keyboard.dismiss()}
               editable={false}
             />
@@ -216,7 +243,7 @@ export default function CustomWorkoutScreen() {
             <TouchableOpacity
               style={styles.sheetButton}
               onPress={() => {
-                setStartTime(Date.now());
+                update({ startTime: Date.now() });
                 setEndTime(null);
               }}
             >
@@ -251,14 +278,12 @@ export default function CustomWorkoutScreen() {
             onPress: () => {
               const selected = pickerData.filter((e) => pickerSelected.has(e.exerciseId));
               const now = Date.now();
-              setExercises((prev) => [
-                ...prev,
-                ...selected.map((e, i) => ({
-                  id: `${e.exerciseId}_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
-                  exercise: e,
-                  sets: [{ weight: '', reps: '', completed: false }],
-                })),
-              ]);
+              const newExercises: WorkoutExercise[] = selected.map((e, i) => ({
+                id: `${e.exerciseId}_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+                exercise: e,
+                sets: [{ weight: '', reps: '', completed: false }],
+              }));
+              update({ exercises: [...session.exercises, ...newExercises] });
               setPickerSelected(new Set());
               setPickerVisible(false);
             },
