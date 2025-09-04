@@ -3,19 +3,19 @@ import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Keyboard,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Keyboard,
+    Modal,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import CustomHeader from '@/components/CustomHeader';
@@ -46,14 +46,15 @@ export default function CustomWorkoutScreen() {
   const [pickerLoading, setPickerLoading] = React.useState(false);
   const [pickerSelected, setPickerSelected] = React.useState<Set<string>>(new Set());
 
+  // Keep timer in sync with session start time so it survives navigation
   React.useEffect(() => {
     const interval = setInterval(() => {
       const base = endTime ?? Date.now();
-      const delta = Math.max(0, Math.floor((base - startTime) / 1000));
+      const delta = Math.max(0, Math.floor((base - (session.startTime ?? startTime)) / 1000));
       setSeconds(delta);
     }, 1000);
     return () => clearInterval(interval);
-  }, [startTime, endTime]);
+  }, [session.startTime, startTime, endTime]);
 
   React.useEffect(() => {
     if (!pickerVisible) return;
@@ -119,7 +120,7 @@ export default function CustomWorkoutScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <CustomHeader
-        title={name}
+        title={session.name || name}
         showBackButton
         rightTextButton={{ label: 'FINISH', onPress: handleFinish }}
         menuOpenOnTap

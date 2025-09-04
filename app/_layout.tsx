@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ExpoContextMenuProvider } from '@appandflow/expo-context-menu';
@@ -24,12 +25,15 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <ExpoContextMenuProvider>
         <WorkoutSessionProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="exercise/create" options={{ headerShown: false }} />
-            <Stack.Screen name="workout/custom" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
+          <>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="exercise/create" options={{ headerShown: false }} />
+              <Stack.Screen name="workout/custom" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <ActiveWorkoutBanner />
+          </>
           <StatusBar style="auto" />
         </WorkoutSessionProvider>
       </ExpoContextMenuProvider>
