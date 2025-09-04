@@ -1,19 +1,24 @@
+import { useWorkoutSession } from '@/context/WorkoutSessionContext';
 import { router } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
 
 export default function WorkoutsScreen() {
+  const { isActive, start } = useWorkoutSession();
   return (
     <ThemedView style={styles.container}>
       <View style={styles.content}> 
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => router.push('/workout/custom')}
+          onPress={() => {
+            if (!isActive) start('Custom Workout');
+            router.push('/workout/custom');
+          }}
           accessibilityRole="button"
           accessibilityLabel="Start an empty workout"
         >
-          <Text style={styles.primaryButtonText}>Start an empty workout</Text>
+          <Text style={styles.primaryButtonText}>{isActive ? 'Resume active workout' : 'Start an empty workout'}</Text>
         </TouchableOpacity>
       </View>
     </ThemedView>

@@ -22,6 +22,7 @@ import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+import { useWorkoutSession } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import ExerciseCardItem, { WorkoutExercise } from './ExerciseCard';
@@ -29,9 +30,10 @@ import ExerciseCardItem, { WorkoutExercise } from './ExerciseCard';
 export default function CustomWorkoutScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { session, isActive, start, update, finish } = useWorkoutSession();
 
-  const [name, setName] = React.useState('Custom Workout');
-  const [startTime, setStartTime] = React.useState<number>(() => Date.now());
+  const [name, setName] = React.useState(session.name || 'Custom Workout');
+  const [startTime, setStartTime] = React.useState<number>(() => session.startTime ?? Date.now());
   const [endTime, setEndTime] = React.useState<number | null>(null);
   const [note, setNote] = React.useState('');
   const [seconds, setSeconds] = React.useState(0);
@@ -109,6 +111,7 @@ export default function CustomWorkoutScreen() {
       return;
     }
     setEndTime(Date.now());
+    finish();
     router.back();
   };
 
