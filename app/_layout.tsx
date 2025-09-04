@@ -4,7 +4,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
+// Active banner is now integrated into TabBar; keeping import commented if needed in future
+// import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ExpoContextMenuProvider } from '@appandflow/expo-context-menu';
@@ -32,7 +33,7 @@ export default function RootLayout() {
               <Stack.Screen name="workout/custom" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <ActiveWorkoutBanner />
+            {/* Banner moved into custom TabBar */}
           </>
           <StatusBar style="auto" />
         </WorkoutSessionProvider>
