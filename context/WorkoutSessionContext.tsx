@@ -1,4 +1,5 @@
 import { Exercise } from '@/services/exerciseService';
+import { dismissWorkoutNotification, scheduleWorkoutNotification } from '@/services/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React from 'react';
 
@@ -57,8 +58,11 @@ export function WorkoutSessionProvider({ children }: { children: React.ReactNode
   const persist = React.useCallback(async (next: SessionState) => {
     setSession(next);
     try {
-      if (next.id) await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      else await AsyncStorage.removeItem(STORAGE_KEY);
+      if (next.id) {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } else {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+      }
     } catch {}
   }, []);
 
@@ -72,19 +76,27 @@ export function WorkoutSessionProvider({ children }: { children: React.ReactNode
         exercises: [],
       };
       persist(next);
+      scheduleWorkoutNotification(name);
     },
     [persist]
   );
 
-  const update = React.useCallback((patch: Partial<SessionState>) => {
-    persist({ ...session, ...patch });
-  }, [persist, session]);
+  const update = React.useCallback(
+    (patch: Partial<SessionState>) => {
+      persist({ ...session, ...patch });
+    },
+    [persist, session]
+  );
 
   const finish = React.useCallback(() => {
     persist(DEFAULT);
+    dismissWorkoutNotification();
   }, [persist]);
 
-  const value = React.useMemo(() => ({ session, isActive, start, update, finish }), [session, isActive, start, update, finish]);
+  const value = React.useMemo(
+    () => ({ session, isActive, start, update, finish }),
+    [session, isActive, start, update, finish]
+  );
 
   return <WorkoutSessionContext.Provider value={value}>{children}</WorkoutSessionContext.Provider>;
 }

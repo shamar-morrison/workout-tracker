@@ -8,7 +8,9 @@ import 'react-native-reanimated';
 // import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { setupNotificationChannels } from '@/services/notificationService';
 import { ExpoContextMenuProvider } from '@appandflow/expo-context-menu';
+import { useEffect } from 'react';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -17,6 +19,10 @@ export default function RootLayout() {
     'Inter-Medium': require('../assets/fonts/Inter-Medium.ttf'),
     'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.ttf'),
   });
+
+  useEffect(() => {
+    setupNotificationChannels();
+  }, []);
 
   if (!loaded) {
     return null;
