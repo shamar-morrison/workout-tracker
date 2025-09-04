@@ -4,6 +4,8 @@ import { Platform } from 'react-native';
 
 const NOTIFICATION_ID = 'workout-session-notification';
 const CHANNEL_ID = 'workout-session-channel';
+const CATEGORY_ID = 'workout-session';
+export const ACTION_COMPLETE_SET = 'COMPLETE_SET';
 
 export async function setupNotificationChannels() {
 	if (Platform.OS === 'android') {
@@ -14,6 +16,14 @@ export async function setupNotificationChannels() {
 			lightColor: '#FF231F7C',
 		});
 	}
+	// Category for in-notification actions
+	await Notifications.setNotificationCategoryAsync(CATEGORY_ID, [
+		{
+			identifier: ACTION_COMPLETE_SET,
+			buttonTitle: 'Complete set',
+			options: { opensAppToForeground: true },
+		},
+	]);
 }
 
 export async function ensureNotificationPermissions() {
@@ -46,19 +56,27 @@ Notifications.addNotificationResponseReceivedListener(response => {
 	}
 });
 
-export async function scheduleWorkoutNotification(name: string) {
+export async function scheduleWorkoutNotificationContent({ title, body, withCompleteAction }: { title: string; body: string; withCompleteAction?: boolean; }) {
+	try { await Notifications.dismissNotificationAsync(NOTIFICATION_ID); } catch {}
 	await Notifications.scheduleNotificationAsync({
 		identifier: NOTIFICATION_ID,
 		content: {
-			title: 'Workout in Progress',
-			body: `Your "${name}" session is active. Tap to resume.`,
+			title,
+			body,
 			sticky: true,
-			data: {
-				url: '/workout/custom'
-			},
+			data: { url: '/workout/custom' },
 			priority: Notifications.AndroidNotificationPriority.MAX,
+			categoryIdentifier: withCompleteAction ? CATEGORY_ID : undefined,
 		},
-		trigger: null, // show immediately
+		trigger: null,
+	});
+}
+
+export async function scheduleWorkoutNotification(name: string) {
+	await scheduleWorkoutNotificationContent({
+		title: 'Workout in Progress',
+		body: `Your "${name}" session is active. Tap to resume.`,
+		withCompleteAction: false,
 	});
 }
 
