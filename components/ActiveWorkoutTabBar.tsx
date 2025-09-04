@@ -51,7 +51,7 @@ export default function ActiveWorkoutTabBar(props: BottomTabBarProps) {
           </Text>
         </TouchableOpacity>
       ) : null}
-      <View style={{ paddingTop: isActive ? OVERLAY_HEIGHT + 8 : 0 }}>
+      <View style={{ paddingTop: isActive ? OVERLAY_HEIGHT : 0 }}>
         <BottomTabBar {...props} />
       </View>
     </View>
