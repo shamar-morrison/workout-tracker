@@ -49,6 +49,7 @@ export default function CustomWorkoutScreen() {
   const [pickerData, setPickerData] = React.useState<Exercise[]>([]);
   const [pickerLoading, setPickerLoading] = React.useState(false);
   const [pickerSelected, setPickerSelected] = React.useState<Set<string>>(new Set());
+  const selectionOrder = React.useMemo(() => Array.from(pickerSelected), [pickerSelected]);
 
   // Ensure a session exists and keep timer ticking from session.startTime
   React.useEffect(() => {
@@ -284,7 +285,9 @@ export default function CustomWorkoutScreen() {
             disabled: pickerSelected.size === 0,
             color: colors.tint,
             onPress: () => {
-              const selected = pickerData.filter((e) => pickerSelected.has(e.exerciseId));
+              const ids = Array.from(pickerSelected);
+              const map = new Map(pickerData.map((e) => [e.exerciseId, e] as const));
+              const selected = ids.map((id) => map.get(id)).filter(Boolean) as Exercise[];
               const now = Date.now();
               const newExercises: WorkoutExercise[] = selected.map((e, i) => ({
                 id: `${e.exerciseId}_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
@@ -309,7 +312,8 @@ export default function CustomWorkoutScreen() {
                 data={pickerData}
                 keyExtractor={(item) => item.exerciseId}
                 renderItem={({ item }) => {
-                  const isSelected = pickerSelected.has(item.exerciseId);
+                  const rankIndex = selectionOrder.indexOf(item.exerciseId);
+                  const isSelected = rankIndex !== -1;
                   const isLetter = item.gifUrl?.startsWith('letter://');
                   const letter = isLetter ? item.gifUrl.replace('letter://', '').slice(0, 1) || 'X' : 'X';
                   const selectedBg = (colorScheme === 'dark') ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
@@ -327,7 +331,16 @@ export default function CustomWorkoutScreen() {
                     >
                       <View style={styles.imageWrapper}>
                         {isSelected ? (
-                          <Ionicons name="checkmark" size={28} color={colors.tint} />
+                          <View style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 14,
+                            backgroundColor: colors.tint,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                            <Text style={{ color: '#fff', fontWeight: '700' }}>{rankIndex + 1}</Text>
+                          </View>
                         ) : isLetter ? (
                           <View style={styles.letterAvatar}>
                             <Text style={styles.letterText}>{letter}</Text>
