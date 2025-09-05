@@ -21,7 +21,7 @@ export type CompletedWorkout = {
 
 const STORAGE_KEY = 'workout_history_v1';
 
-async function loadHistory(): Promise<CompletedWorkout[]> {
+export async function loadHistory(): Promise<CompletedWorkout[]> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -47,6 +47,11 @@ export async function getWorkoutCount(): Promise<number> {
 export async function getWorkoutById(id: string): Promise<CompletedWorkout | null> {
   const history = await loadHistory();
   return history.find((w) => w.id === id) ?? null;
+}
+
+export async function listWorkouts(): Promise<CompletedWorkout[]> {
+  const history = await loadHistory();
+  return [...history].sort((a, b) => b.completedAt - a.completedAt);
 }
 
 function compareSets(a: CompletedSet | null, b: CompletedSet | null): number {

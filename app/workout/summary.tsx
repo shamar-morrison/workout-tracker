@@ -77,12 +77,12 @@ export default function WorkoutSummaryScreen() {
         </View>
         <TouchableOpacity
           accessibilityRole="button"
-          onPress={() => router.replace('/workouts')}
+          onPress={() => router.replace('/(tabs)/history')}
           activeOpacity={0.85}
           style={[styles.homeButton, { backgroundColor: colors.tint }]}
         >
-          <Ionicons name="home-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
-          <Text style={styles.homeButtonText}>Back Home</Text>
+          <Ionicons name="time-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.homeButtonText}>View in History</Text>
         </TouchableOpacity>
       </ScrollView>
     </ThemedView>
