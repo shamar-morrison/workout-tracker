@@ -32,10 +32,19 @@ type MenuItem = {
   destructive?: boolean;
 };
 
+type RightTextButton = {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  color?: string;
+};
+
 type HeaderProps = {
   title: string;
   showBackButton?: boolean;
   rightIcons?: IconProps[];
+  rightTextButton?: RightTextButton;
+  onBackPress?: () => void;
   enableSearch?: boolean;
   initialQuery?: string;
   onSearchQueryChange?: (text: string) => void;
@@ -52,6 +61,8 @@ export default function CustomHeader({
   title,
   showBackButton = false,
   rightIcons,
+  rightTextButton,
+  onBackPress,
   enableSearch = false,
   initialQuery = '',
   onSearchQueryChange,
@@ -113,6 +124,10 @@ export default function CustomHeader({
   }, [query, debounceMs, enableSearch, onSearchQueryChange]);
 
   const handleBack = () => {
+    if (onBackPress) {
+      onBackPress();
+      return;
+    }
     if (router.canGoBack()) {
       router.back();
     }
@@ -174,6 +189,24 @@ export default function CustomHeader({
           </View>
         ) : null}
         <View style={styles.rightContainer}>
+          {rightTextButton ? (
+            <TouchableOpacity
+              onPress={rightTextButton.onPress}
+              disabled={rightTextButton.disabled}
+              style={styles.textButton}
+            >
+              <Text
+                style={{
+                  color: rightTextButton.color || colors.text,
+                  fontWeight: '600',
+                  fontSize: 16,
+                  opacity: rightTextButton.disabled ? 0.5 : 1,
+                }}
+              >
+                {rightTextButton.label}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
           {combinedRightIcons.map((icon, index) => (
             <TouchableOpacity key={index} onPress={icon.onPress} style={styles.icon}>
               <Ionicons name={icon.name} size={icon.size || 24} color={icon.color || colors.text} />
@@ -266,6 +299,9 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 20,
+  },
+  textButton: {
+    marginLeft: 10,
   },
   searchContainer: {
     flex: 1,
