@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import React from 'react';
-import { Animated, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Animated, FlatList, Modal, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
 import SimpleMenu from '@/components/SimpleMenu';
@@ -8,7 +9,9 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+import CustomHeader from '@/components/CustomHeader';
 import { WorkoutExercise } from '@/context/WorkoutSessionContext';
+import { Exercise, fetchExercises } from '@/services/exerciseService';
 
 type ExerciseCardProps = {
   item: WorkoutExercise;
@@ -23,6 +26,23 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
   const menuIconRef = React.useRef<View>(null);
   const [menuAnchorY, setMenuAnchorY] = React.useState<number | undefined>(undefined);
   const shakeMapRef = React.useRef<Record<number, Animated.Value>>({});
+
+  // Replace exercise modal state
+  const [replaceVisible, setReplaceVisible] = React.useState(false);
+  const [replaceSearch, setReplaceSearch] = React.useState('');
+  const [replaceLoading, setReplaceLoading] = React.useState(false);
+  const [replaceData, setReplaceData] = React.useState<Exercise[]>([]);
+  const [replaceSelected, setReplaceSelected] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!replaceVisible) return;
+    let cancelled = false;
+    setReplaceLoading(true);
+    fetchExercises(25, replaceSearch)
+      .then((data) => { if (!cancelled) setReplaceData(data); })
+      .finally(() => { if (!cancelled) setReplaceLoading(false); });
+    return () => { cancelled = true; };
+  }, [replaceVisible, replaceSearch]);
 
   const toTitleCase = React.useCallback((str: string) => {
     if (!str) return '';
@@ -66,15 +86,24 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
         <SimpleMenu
           visible={menuVisible}
           onClose={() => setMenuVisible(false)}
-          items={[{
-            title: 'Remove exercise',
-            destructive: hasData,
-            onPress: onRemove,
-            confirmTitle: hasData ? 'Remove exercise?' : undefined,
-            confirmMessage: hasData ? 'This will delete any recorded sets for this exercise.' : undefined,
-            confirmConfirmText: hasData ? 'Remove' : undefined,
-            confirmCancelText: hasData ? 'Cancel' : undefined,
-          }]}
+          items={[
+            {
+              title: 'Replace exercise',
+              onPress: () => {
+                setMenuVisible(false);
+                setReplaceVisible(true);
+              },
+            },
+            {
+              title: 'Remove exercise',
+              destructive: hasData,
+              onPress: onRemove,
+              confirmTitle: hasData ? 'Remove exercise?' : undefined,
+              confirmMessage: hasData ? 'This will delete any recorded sets for this exercise.' : undefined,
+              confirmConfirmText: hasData ? 'Remove' : undefined,
+              confirmCancelText: hasData ? 'Cancel' : undefined,
+            },
+          ]}
           anchorY={menuAnchorY}
         />
       </View>
@@ -160,6 +189,73 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
       <TouchableOpacity onPress={addSet} style={cardStyles.addSetButton}>
         <Text style={cardStyles.addSetText}>ADD SET</Text>
       </TouchableOpacity>
+
+      {/* Replace Exercise Modal */}
+      <Modal visible={replaceVisible} animationType="slide" onRequestClose={() => setReplaceVisible(false)}>
+        <CustomHeader
+          title="Replace Exercise"
+          showBackButton
+          onBackPress={() => setReplaceVisible(false)}
+          enableSearch
+          searchPlaceholder="Search for an exercise..."
+          initialQuery={replaceSearch}
+          onSearchQueryChange={setReplaceSearch}
+          rightTextButton={{
+            label: 'REPLACE',
+            disabled: !replaceSelected,
+            color: Colors[colorScheme ?? 'light'].tint,
+            onPress: () => {
+              const selected = replaceData.find((e) => e.exerciseId === replaceSelected);
+              if (selected) {
+                onUpdate({ ...item, exercise: selected });
+              }
+              setReplaceVisible(false);
+              setReplaceSelected(null);
+            },
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            {replaceLoading ? (
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
+              </View>
+            ) : (
+              <FlatList
+                keyboardDismissMode="on-drag"
+                keyboardShouldPersistTaps="handled"
+                data={replaceData}
+                keyExtractor={(it) => it.exerciseId}
+                renderItem={({ item: ex }) => {
+                  const isSelected = replaceSelected === ex.exerciseId;
+                  const selectedBg = (colorScheme === 'dark') ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
+                  const isLetter = ex.gifUrl?.startsWith('letter://');
+                  const letter = isLetter ? ex.gifUrl.replace('letter://', '').slice(0, 1) || 'X' : 'X';
+                  return (
+                    <TouchableOpacity
+                      onPress={() => setReplaceSelected((prev) => (prev === ex.exerciseId ? null : ex.exerciseId))}
+                      style={[cardStyles.rExerciseContainer, isSelected && { backgroundColor: selectedBg }]}
+                    >
+                      <View style={cardStyles.rImageWrapper}>
+                        {isSelected ? (
+                          <Ionicons name="checkmark" size={28} color={Colors[colorScheme ?? 'light'].tint} />
+                        ) : isLetter ? (
+                          <View style={cardStyles.letterAvatar}><Text style={cardStyles.letterText}>{letter}</Text></View>
+                        ) : (
+                          <Image source={{ uri: ex.gifUrl }} style={cardStyles.exerciseImage} />
+                        )}
+                      </View>
+                      <View style={cardStyles.rExerciseDetails}>
+                        <ThemedText style={cardStyles.rExerciseName}>{toTitleCase(ex.name)}</ThemedText>
+                        <ThemedText style={cardStyles.rExerciseBodyPart}>{toTitleCase(ex.bodyParts?.join(', ') || '')}</ThemedText>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            )}
+          </View>
+        </CustomHeader>
+      </Modal>
     </View>
   );
 }
@@ -243,6 +339,30 @@ const cardStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  // Replace picker styles matching add-exercise list
+  rExerciseContainer: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#2d2d2d',
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rImageWrapper: {
+    width: 50,
+    height: 50,
+    marginRight: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  exerciseImage: { width: 50, height: 50, borderRadius: 8 },
+  letterAvatar: { width: 50, height: 50, borderRadius: 8, backgroundColor: '#0a7ea4', alignItems: 'center', justifyContent: 'center' },
+  letterText: { color: '#fff', fontSize: 20, fontWeight: '700' },
+  rExerciseDetails: { flex: 1 },
+  rExerciseName: { fontSize: 16, fontWeight: '700' },
+  rExerciseBodyPart: { fontSize: 14, color: '#888' },
 });
 
 
