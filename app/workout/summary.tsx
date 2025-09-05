@@ -68,7 +68,6 @@ export default function WorkoutSummaryScreen() {
             <View key={ex.exerciseId} style={styles.exerciseRow}>
               <Text style={[styles.exerciseName, { color: colors.text }]}>{ex.name.replace(/\w\S*/g, (t) => t[0].toUpperCase() + t.slice(1).toLowerCase())}</Text>
               <View style={{ flex: 1 }} />
-              <Text style={{ color: colors.icon }}>{ex.setCount} ×</Text>
               <Text style={[styles.bestSet, { color: colors.text }]}>
                 {ex.bestSet ? `${ex.bestSet.weight} kg × ${ex.bestSet.reps}` : '—'}
               </Text>

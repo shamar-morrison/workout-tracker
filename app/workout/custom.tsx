@@ -153,12 +153,15 @@ export default function CustomWorkoutScreen() {
 
     const finalize = async () => {
       // Mark valid sets as complete; drop empty/invalid sets
-      const cleaned = session.exercises.map((ex) => {
-        const kept = ex.sets
-          .filter((s) => s.completed || isValid(s))
-          .map((s) => (s.completed ? s : { ...s, completed: true }));
-        return { ...ex, sets: kept };
-      });
+      const cleaned = session.exercises
+        .map((ex) => {
+          const kept = ex.sets
+            .filter((s) => s.completed || isValid(s))
+            .map((s) => (s.completed ? s : { ...s, completed: true }));
+          return { ...ex, sets: kept };
+        })
+        // Drop exercises that ended up with no valid/completed sets
+        .filter((ex) => ex.sets.length > 0);
 
       // Build summary metrics
       const durationSec = Math.max(0, Math.floor(((Date.now()) - (session.startTime ?? Date.now())) / 1000));
@@ -183,7 +186,9 @@ export default function CustomWorkoutScreen() {
           setCount,
           bestSet: best,
         };
-      });
+      })
+      // Save only exercises with at least one valid/completed set
+      .filter((ex) => ex.setCount > 0);
 
       const { id, workoutNumber, prs } = await recordCompletedWorkout({
         name: session.name,
