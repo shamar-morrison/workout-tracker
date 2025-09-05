@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, Animated, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { Animated, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
 import SimpleMenu from '@/components/SimpleMenu';
@@ -46,22 +46,6 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
       return weightHas || repsHas || completedHas;
     });
   }, [item.sets]);
-
-  const requestRemove = () => {
-    if (hasData) {
-      Alert.alert(
-        'Remove exercise?',
-        'This will delete any recorded sets for this exercise.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Remove', style: 'destructive', onPress: onRemove },
-        ],
-        { cancelable: true }
-      );
-    } else {
-      onRemove();
-    }
-  };
 
   return (
     <View style={[cardStyles.cardContainer, { backgroundColor: colors.background }]}>
