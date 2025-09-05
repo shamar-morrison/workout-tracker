@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
@@ -8,9 +8,10 @@ import 'react-native-reanimated';
 // import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { setupNotificationChannels } from '@/services/notificationService';
+import { dismissWorkoutNotification, setupNotificationChannels } from '@/services/notificationService';
 import { ExpoContextMenuProvider } from '@appandflow/expo-context-menu';
-import { useEffect } from 'react';
+import * as Notifications from 'expo-notifications';
+import { useEffect, useRef } from 'react';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -32,6 +33,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <ExpoContextMenuProvider>
         <WorkoutSessionProvider>
+          <NotificationRedirector />
           <>
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -46,4 +48,32 @@ export default function RootLayout() {
       </ExpoContextMenuProvider>
     </ThemeProvider>
   );
+}
+
+function NotificationRedirector() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const lastResponse = Notifications.useLastNotificationResponse();
+  const handledIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!lastResponse) return;
+    if (lastResponse.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
+
+    const id = lastResponse.notification.request.identifier as string;
+    if (handledIdRef.current === id) return; // already handled this notification
+    handledIdRef.current = id;
+
+    const url = lastResponse.notification.request.content.data?.url as string | undefined;
+    if (!url) return;
+    if (url === '/workout/custom') {
+      dismissWorkoutNotification();
+      if (pathname !== '/workout/custom') {
+        router.replace('/workout/custom');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastResponse]);
+
+  return null;
 }

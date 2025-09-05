@@ -3,19 +3,19 @@ import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Keyboard,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Keyboard,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import CustomHeader from '@/components/CustomHeader';
@@ -141,6 +141,13 @@ export default function CustomWorkoutScreen() {
       <CustomHeader
         title={session.name || name}
         showBackButton
+        onBackPress={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/workouts');
+          }
+        }}
         rightTextButton={{ label: 'FINISH', onPress: handleFinish }}
         menuOpenOnTap
         menuItems={[

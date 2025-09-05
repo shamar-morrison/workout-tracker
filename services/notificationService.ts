@@ -1,5 +1,4 @@
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
 import { Platform } from 'react-native';
 
 const NOTIFICATION_ID = 'workout-session-notification';
@@ -45,15 +44,6 @@ Notifications.setNotificationHandler({
 		shouldShowBanner: true,
 		shouldShowList: true,
 	}),
-});
-
-// Handle notification tap events (deep linking)
-Notifications.addNotificationResponseReceivedListener(response => {
-	const url = response.notification.request.content.data?.url;
-	if (url) {
-		// @ts-ignore - Href type is very strict, but this works
-		router.push(url);
-	}
 });
 
 export async function scheduleWorkoutNotificationContent({ title, body, withCompleteAction }: { title: string; body: string; withCompleteAction?: boolean; }) {
