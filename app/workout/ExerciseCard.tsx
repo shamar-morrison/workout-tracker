@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, Animated, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
 import SimpleMenu from '@/components/SimpleMenu';
@@ -22,6 +22,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
   const [menuVisible, setMenuVisible] = React.useState(false);
   const menuIconRef = React.useRef<View>(null);
   const [menuAnchorY, setMenuAnchorY] = React.useState<number | undefined>(undefined);
+  const shakeMapRef = React.useRef<Record<number, Animated.Value>>({});
 
   const toTitleCase = React.useCallback((str: string) => {
     if (!str) return '';
@@ -137,12 +138,37 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
             onChangeText={(t) => handleChangeSet(idx, 'reps', t.replace(/[^0-9]/g, ''))}
             placeholder=""
           />
-          <TouchableOpacity
-            onPress={() => handleChangeSet(idx, 'completed', !set.completed)}
-            style={[cardStyles.checkButton, { width: 36 }, set.completed && { backgroundColor: colors.tint }]}
-          >
-            <Ionicons name="checkmark" size={18} color={set.completed ? '#fff' : Colors[colorScheme ?? 'light'].icon} />
-          </TouchableOpacity>
+          {(() => {
+            // Shake animation per-row
+            const shakeRef = (shakeMapRef.current[idx] ||= new Animated.Value(0));
+            const translateX = shakeRef.interpolate({ inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1], outputRange: [0, -6, 6, -4, 4, 0] });
+            const triggerShake = () => {
+              shakeRef.setValue(0);
+              Animated.timing(shakeRef, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+            };
+            return (
+              <Animated.View style={{ transform: [{ translateX }], width: 36 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    const hasWeight = /\d/.test((set.weight ?? '').trim());
+                    const hasReps = /\d/.test((set.reps ?? '').trim());
+                    if (!set.completed && (!hasWeight || !hasReps)) {
+                      if (Platform.OS === 'android') {
+                        ToastAndroid.show('Enter weight and reps', ToastAndroid.SHORT);
+                      } else {
+                        triggerShake();
+                      }
+                      return;
+                    }
+                    handleChangeSet(idx, 'completed', !set.completed);
+                  }}
+                  style={[cardStyles.checkButton, set.completed && { backgroundColor: colors.tint }]}
+                >
+                  <Ionicons name="checkmark" size={18} color={set.completed ? '#fff' : Colors[colorScheme ?? 'light'].icon} />
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })()}
         </View>
         </Swipeable>
       ))}

@@ -121,12 +121,13 @@ export default function CustomWorkoutScreen() {
   };
 
   const handleFinish = () => {
-    if (session.exercises.length === 0) {
-      const message = 'Please add at least one exercise before finishing.';
+    const hasCompletedSet = session.exercises.some((ex) => ex.sets.some((s) => s.completed));
+    if (!hasCompletedSet) {
+      const message = 'Complete at least one set before finishing.';
       if (Platform.OS === 'android') {
         ToastAndroid.show(message, ToastAndroid.SHORT);
       } else {
-        Alert.alert('Add at least one exercise', message);
+        Alert.alert('Complete a set first', message);
       }
       return;
     }
