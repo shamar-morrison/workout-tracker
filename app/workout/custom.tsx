@@ -25,6 +25,7 @@ import { Colors } from '@/constants/Colors';
 import { useWorkoutSession, WorkoutExercise } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
+import { recordCompletedWorkout } from '@/services/historyService';
 import ExerciseCardItem from './ExerciseCard';
 
 export default function CustomWorkoutScreen() {
@@ -150,7 +151,7 @@ export default function CustomWorkoutScreen() {
       return;
     }
 
-    const finalize = () => {
+    const finalize = async () => {
       // Mark valid sets as complete; drop empty/invalid sets
       const cleaned = session.exercises.map((ex) => {
         const kept = ex.sets
@@ -158,10 +159,44 @@ export default function CustomWorkoutScreen() {
           .map((s) => (s.completed ? s : { ...s, completed: true }));
         return { ...ex, sets: kept };
       });
+
+      // Build summary metrics
+      const durationSec = Math.max(0, Math.floor(((Date.now()) - (session.startTime ?? Date.now())) / 1000));
+      let totalVolume = 0;
+      const exercisesSummary = cleaned.map((ex) => {
+        let best: { weight: number; reps: number } | null = null;
+        let setCount = 0;
+        for (const s of ex.sets) {
+          const weight = parseFloat(s.weight || '0');
+          const reps = parseInt(s.reps || '0', 10);
+          if (weight > 0 && reps > 0) {
+            totalVolume += weight * reps;
+            setCount += 1;
+            if (!best || weight > best.weight || (weight === best.weight && reps > best.reps)) {
+              best = { weight, reps };
+            }
+          }
+        }
+        return {
+          exerciseId: ex.exercise.exerciseId,
+          name: ex.exercise.name,
+          setCount,
+          bestSet: best,
+        };
+      });
+
+      const { id, workoutNumber, prs } = await recordCompletedWorkout({
+        name: session.name,
+        completedAt: Date.now(),
+        durationSec,
+        totalVolume,
+        exercises: exercisesSummary,
+      });
+
       update({ exercises: cleaned });
       setEndTime(Date.now());
       finish();
-      router.back();
+      router.replace({ pathname: '/workout/summary', params: { id } });
     };
 
     if (validNotCompleted > 0 || invalidSets > 0) {
