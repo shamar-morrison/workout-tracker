@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedView } from '@/components/ThemedView';
@@ -17,6 +17,7 @@ function formatDuration(sec: number) {
 
 export default function WorkoutSummaryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const scheme = useColorScheme();
   const colors = Colors[scheme ?? 'light'];
   const [workout, setWorkout] = React.useState<CompletedWorkout | null>(null);
@@ -33,7 +34,7 @@ export default function WorkoutSummaryScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: Math.max(16, insets.top + 8) }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: Math.max(16, insets.top + 8), paddingBottom: Math.max(24, insets.bottom + 24) }}>
         <View style={[styles.banner, { backgroundColor: colors.tint }]}> 
           <Text style={styles.bannerTitle}>Congratulations!</Text>
           <Text style={styles.bannerSub}>That’s your workout number</Text>
@@ -74,6 +75,15 @@ export default function WorkoutSummaryScreen() {
             </View>
           ))}
         </View>
+        <TouchableOpacity
+          accessibilityRole="button"
+          onPress={() => router.replace('/workouts')}
+          activeOpacity={0.85}
+          style={[styles.homeButton, { backgroundColor: colors.tint }]}
+        >
+          <Ionicons name="home-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.homeButtonText}>Back Home</Text>
+        </TouchableOpacity>
       </ScrollView>
     </ThemedView>
   );
@@ -127,6 +137,20 @@ const styles = StyleSheet.create({
   exHeaderRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, paddingBottom: 4 },
   exerciseName: { fontWeight: '400' },
   bestSet: { marginLeft: 12, fontWeight: '400' },
+  homeButton: {
+    marginTop: 16,
+    alignSelf: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  homeButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 });
 
 
