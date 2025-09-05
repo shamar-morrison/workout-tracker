@@ -122,19 +122,61 @@ export default function CustomWorkoutScreen() {
   };
 
   const handleFinish = () => {
-    const hasCompletedSet = session.exercises.some((ex) => ex.sets.some((s) => s.completed));
-    if (!hasCompletedSet) {
-      const message = 'Complete at least one set before finishing.';
-      if (Platform.OS === 'android') {
-        ToastAndroid.show(message, ToastAndroid.SHORT);
-      } else {
-        Alert.alert('Complete a set first', message);
-      }
+    // If no exercises at all
+    if (session.exercises.length === 0) {
+      const message = 'Please add at least one exercise before finishing.';
+      if (Platform.OS === 'android') ToastAndroid.show(message, ToastAndroid.SHORT);
+      else Alert.alert('Add exercises first', message);
       return;
     }
-    setEndTime(Date.now());
-    finish();
-    router.back();
+
+    const isValid = (s: { weight: string; reps: string }) => /\d/.test((s.weight ?? '').trim()) && /\d/.test((s.reps ?? '').trim());
+
+    const completedSets = session.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.completed).length, 0);
+    const validNotCompleted = session.exercises.reduce(
+      (acc, ex) => acc + ex.sets.filter((s) => !s.completed && isValid(s)).length,
+      0
+    );
+    const invalidSets = session.exercises.reduce(
+      (acc, ex) => acc + ex.sets.filter((s) => !s.completed && !isValid(s)).length,
+      0
+    );
+
+    // No completed or valid sets at all
+    if (completedSets === 0 && validNotCompleted === 0) {
+      const message = 'Complete at least one set before finishing.';
+      if (Platform.OS === 'android') ToastAndroid.show(message, ToastAndroid.SHORT);
+      else Alert.alert('Complete a set first', message);
+      return;
+    }
+
+    const finalize = () => {
+      // Mark valid sets as complete; drop empty/invalid sets
+      const cleaned = session.exercises.map((ex) => {
+        const kept = ex.sets
+          .filter((s) => s.completed || isValid(s))
+          .map((s) => (s.completed ? s : { ...s, completed: true }));
+        return { ...ex, sets: kept };
+      });
+      update({ exercises: cleaned });
+      setEndTime(Date.now());
+      finish();
+      router.back();
+    };
+
+    if (validNotCompleted > 0 || invalidSets > 0) {
+      const msg = `You have ${validNotCompleted + invalidSets} incomplete set${
+        validNotCompleted + invalidSets === 1 ? '' : 's'
+      }. Empty sets will be discarded and sets with data will be marked as complete.`;
+      Alert.alert('Finish workout?', msg, [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Finish', style: 'destructive', onPress: finalize },
+      ]);
+      return;
+    }
+
+    // Nothing to resolve; finish normally
+    finalize();
   };
 
   return (
