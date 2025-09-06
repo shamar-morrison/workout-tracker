@@ -89,6 +89,14 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
           onClose={() => setMenuVisible(false)}
           items={[
             {
+              title: `Use ${item.weightUnit === 'kg' ? 'LBS (Pounds)' : 'KG (Kilograms)'}`,
+              onPress: () => {
+                const nextUnit = item.weightUnit === 'kg' ? 'lbs' : 'kg';
+                onUpdate({ ...item, weightUnit: nextUnit });
+                setMenuVisible(false);
+              },
+            },
+            {
               title: 'Replace exercise',
               onPress: () => {
                 setMenuVisible(false);
@@ -112,7 +120,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
       <View style={cardStyles.headersRow}>
         <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 40 }]}>SET</ThemedText>
         <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { flex: 1 }]}>PREVIOUS</ThemedText>
-        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>LBS</ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>{(item.weightUnit || 'lbs').toUpperCase()}</ThemedText>
         <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>REPS</ThemedText>
         <View style={{ width: 36 }} />
       </View>

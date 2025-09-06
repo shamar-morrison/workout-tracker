@@ -15,6 +15,7 @@ export type WorkoutExercise = {
 	id: string; // unique per added card
 	exercise: Exercise;
 	sets: WorkoutSet[];
+	weightUnit?: 'lbs' | 'kg';
 };
 
 type SessionState = {
@@ -60,7 +61,7 @@ function buildNotificationFromSession(session: SessionState): { title: string; b
 			return {
 				title: titleCase(ex.exercise.name || 'Exercise'),
 				body: hasValues
-					? `${set.weight} lbs x ${set.reps} - (${idx + 1} of ${ex.sets.length})`
+					? `${set.weight} ${ex.weightUnit || 'lbs'} x ${set.reps} - (${idx + 1} of ${ex.sets.length})`
 					: 'Add values to mark as completed',
 				withCompleteAction: hasValues,
 			};
