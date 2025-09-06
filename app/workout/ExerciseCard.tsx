@@ -17,9 +17,10 @@ type ExerciseCardProps = {
   item: WorkoutExercise;
   onUpdate: (next: WorkoutExercise) => void;
   onRemove: () => void;
+  onInputFocus?: (refocus: () => void) => void;
 };
 
-export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardProps) {
+export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }: ExerciseCardProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -137,20 +138,32 @@ export default function ExerciseCard({ item, onUpdate, onRemove }: ExerciseCardP
             {idx + 1}
           </ThemedText>
           <ThemedText style={[cardStyles.previousText, { flex: 1 }]}>—</ThemedText>
+          {(() => {
+            const weightRef = React.useRef<TextInput>(null);
+            const repsRef = React.useRef<TextInput>(null);
+            return (
+              <>
           <TextInput
+            ref={weightRef}
             style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
             keyboardType="numeric"
             value={set.weight}
             onChangeText={(t) => handleChangeSet(idx, 'weight', t.replace(/[^0-9.]/g, ''))}
             placeholder=""
+            onFocus={() => { onInputFocus && onInputFocus(() => weightRef.current?.focus()); }}
           />
           <TextInput
+            ref={repsRef}
             style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
             keyboardType="numeric"
             value={set.reps}
             onChangeText={(t) => handleChangeSet(idx, 'reps', t.replace(/[^0-9]/g, ''))}
             placeholder=""
+            onFocus={() => { onInputFocus && onInputFocus(() => repsRef.current?.focus()); }}
           />
+              </>
+            );
+          })()}
           {(() => {
             // Shake animation per-row
             const shakeRef = (shakeMapRef.current[idx] ||= new Animated.Value(0));

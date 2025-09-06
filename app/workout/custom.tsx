@@ -7,6 +7,7 @@ import {
   Alert,
   FlatList,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -51,6 +52,16 @@ export default function CustomWorkoutScreen() {
   const [pickerLoading, setPickerLoading] = React.useState(false);
   const [pickerSelected, setPickerSelected] = React.useState<Set<string>>(new Set());
   const selectionOrder = React.useMemo(() => Array.from(pickerSelected), [pickerSelected]);
+
+  // Track keyboard height to pad list so last inputs stay visible
+  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardHeight(0));
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
 
   // Ensure a session exists and keep timer ticking from session.startTime
   React.useEffect(() => {
@@ -219,6 +230,16 @@ export default function CustomWorkoutScreen() {
     finalize();
   };
 
+  const listRef = React.useRef<FlatList<any> | null>(null);
+  // expose ref for child callback usage without prop-drilling through wrappers
+  // (kept simple; not meant for general global usage)
+  ;(global as any).__customWorkoutListRef = null;
+
+  React.useEffect(() => {
+    (global as any).__customWorkoutListRef = listRef.current;
+    return () => { (global as any).__customWorkoutListRef = null; };
+  }, []);
+
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -259,44 +280,67 @@ export default function CustomWorkoutScreen() {
             multiline
           />
 
-          <FlatList
-            data={session.exercises}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <ExerciseCardItem
-                item={item}
-                onUpdate={(updated) => {
-                  const nextExercises = session.exercises.map((ex) => (ex.id === updated.id ? updated : ex));
-                  update({ exercises: nextExercises });
-                }}
-                onRemove={() => {
-                  const nextExercises = session.exercises.filter((ex) => ex.id !== item.id);
-                  update({ exercises: nextExercises });
-                }}
-              />
-            )}
-            ListFooterComponent={() => (
-              <View style={{ paddingVertical: 8 }}>
-                <TouchableOpacity
-                  style={styles.addExercise}
-                  onPress={() => setPickerVisible(true)}
-                  accessibilityRole="button"
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
-                </TouchableOpacity>
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <FlatList
+              ref={(r) => { listRef.current = r as any; (global as any).__customWorkoutListRef = r; }}
+              data={session.exercises}
+              keyExtractor={(item) => item.id}
+              keyboardDismissMode="none"
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: keyboardHeight + 24 }}
+              renderItem={({ item, index }) => (
+                <ExerciseCardItem
+                  item={item}
+                  onInputFocus={(refocus) => {
+                    const scrollRef = listRef.current as any;
+                    if (!scrollRef || !scrollRef.scrollToIndex) return;
+                    try {
+                      // For the last item, scroll it to the top so inputs have max space above keyboard
+                      const isLast = index === session.exercises.length - 1;
+                      scrollRef.scrollToIndex({ index, viewPosition: isLast ? 0 : 0.1, animated: true });
+                      // Re-focus after scroll finishes to avoid focus being stolen by other inputs
+                      setTimeout(() => { try { refocus?.(); } catch {} }, 180);
+                    } catch {
+                      // fallback in case measurement isn't ready
+                      const current = scrollRef._scrollMetrics?.offset || 0;
+                      scrollRef.scrollToOffset?.({ offset: current + 120, animated: true });
+                      setTimeout(() => { try { refocus?.(); } catch {} }, 120);
+                    }
+                  }}
+                  onUpdate={(updated) => {
+                    const nextExercises = session.exercises.map((ex) => (ex.id === updated.id ? updated : ex));
+                    update({ exercises: nextExercises });
+                  }}
+                  onRemove={() => {
+                    const nextExercises = session.exercises.filter((ex) => ex.id !== item.id);
+                    update({ exercises: nextExercises });
+                  }}
+                />
+              )}
+              ListFooterComponent={() => (
+                <View style={{ paddingVertical: 8 }}>
+                  <TouchableOpacity
+                    style={styles.addExercise}
+                    onPress={() => setPickerVisible(true)}
+                    accessibilityRole="button"
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.cancelWorkout}
-                  onPress={handleCancel}
-                  accessibilityRole="button"
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
+                  <TouchableOpacity
+                    style={styles.cancelWorkout}
+                    onPress={handleCancel}
+                    accessibilityRole="button"
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
+                  </TouchableOpacity>
+
+                </View>
+              )}
+            />
+          </KeyboardAvoidingView>
         </ThemedView>
       </CustomHeader>
 

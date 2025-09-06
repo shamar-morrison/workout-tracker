@@ -3,15 +3,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
 import {
-  Keyboard,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Keyboard,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
@@ -249,9 +249,10 @@ export default function CustomHeader({
         <Pressable
           style={{ flex: 1 }}
           onPress={() => {
-            if (isKeyboardVisible.current) {
-              Keyboard.dismiss();
-            } else if (shouldDeactivateOnOutsidePress) {
+            // Only deactivate search mode when keyboard is NOT visible.
+            // Avoid dismissing the keyboard on content presses to prevent
+            // focus conflicts with in-list inputs.
+            if (!isKeyboardVisible.current && shouldDeactivateOnOutsidePress) {
               setIsSearchActive(false);
               if (onSearchToggle) onSearchToggle(false);
             }
