@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
-import { ActivityIndicator, Animated, FlatList, Modal, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, FlatList, Modal, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
 import SimpleMenu from '@/components/SimpleMenu';
@@ -68,6 +68,39 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
     });
   }, [item.sets]);
 
+  const convertWeightValue = React.useCallback((valueStr: string, toUnit: 'lbs' | 'kg') => {
+    const LB_PER_KG = 2.20462;
+    const value = parseFloat((valueStr || '').replace(',', '.'));
+    if (!isFinite(value)) return valueStr || '';
+    const converted = toUnit === 'kg' ? value / LB_PER_KG : value * LB_PER_KG;
+    const rounded = Math.round(converted * 10) / 10; // one decimal place
+    const asString = rounded.toFixed(1).replace(/\.0$/, '');
+    return asString;
+  }, []);
+
+  const handleToggleUnit = React.useCallback(() => {
+    const nextUnit: 'lbs' | 'kg' = item.weightUnit === 'kg' ? 'lbs' : 'kg';
+    setMenuVisible(false);
+    const convertAndUpdate = () => {
+      const nextSets = item.sets.map((s) => ({
+        ...s,
+        weight: convertWeightValue(s.weight, nextUnit),
+      }));
+      onUpdate({ ...item, weightUnit: nextUnit, sets: nextSets });
+    };
+    const justSwitch = () => onUpdate({ ...item, weightUnit: nextUnit });
+
+    Alert.alert(
+      'Change weight unit',
+      `Switch this exercise to ${nextUnit.toUpperCase()}? You can also convert existing weights.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Just switch', onPress: justSwitch },
+        { text: 'Convert values', onPress: convertAndUpdate },
+      ]
+    );
+  }, [item, onUpdate, convertWeightValue]);
+
   return (
     <View style={[cardStyles.cardContainer, { backgroundColor: colors.background }]}>
       <View style={cardStyles.headerRow}>
@@ -90,11 +123,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
           items={[
             {
               title: `Use ${item.weightUnit === 'kg' ? 'LBS (Pounds)' : 'KG (Kilograms)'}`,
-              onPress: () => {
-                const nextUnit = item.weightUnit === 'kg' ? 'lbs' : 'kg';
-                onUpdate({ ...item, weightUnit: nextUnit });
-                setMenuVisible(false);
-              },
+              onPress: handleToggleUnit,
             },
             {
               title: 'Replace exercise',
