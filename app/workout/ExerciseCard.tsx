@@ -205,27 +205,27 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
           </ThemedText>
           <ThemedText style={[cardStyles.previousText, { flex: 1 }]}>—</ThemedText>
           {(() => {
-            const weightRef = React.useRef<TextInput>(null);
-            const repsRef = React.useRef<TextInput>(null);
+            let weightInput: any = null;
+            let repsInput: any = null;
             return (
               <>
           <TextInput
-            ref={weightRef}
+            ref={(r) => { weightInput = r; }}
             style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
             keyboardType="numeric"
             value={set.weight}
             onChangeText={(t) => handleChangeSet(idx, 'weight', t.replace(/[^0-9.]/g, ''))}
             placeholder=""
-            onFocus={() => { onInputFocus && onInputFocus(() => weightRef.current?.focus()); }}
+            onFocus={() => { onInputFocus && onInputFocus(() => weightInput?.focus()); }}
           />
           <TextInput
-            ref={repsRef}
+            ref={(r) => { repsInput = r; }}
             style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
             keyboardType="numeric"
             value={set.reps}
             onChangeText={(t) => handleChangeSet(idx, 'reps', t.replace(/[^0-9]/g, ''))}
             placeholder=""
-            onFocus={() => { onInputFocus && onInputFocus(() => repsRef.current?.focus()); }}
+            onFocus={() => { onInputFocus && onInputFocus(() => repsInput?.focus()); }}
           />
               </>
             );
