@@ -9,6 +9,8 @@ export type WorkoutSet = {
 	weight: string;
 	reps: string;
 	completed: boolean;
+	// Canonical weight in pounds (if parsed). Keeps precision across unit toggles.
+	weightLbs?: number;
 };
 
 export type WorkoutExercise = {

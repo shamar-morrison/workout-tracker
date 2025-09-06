@@ -50,8 +50,18 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
     return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
   }, []);
 
+  const LB_PER_KG = 2.20462;
   const handleChangeSet = (index: number, key: 'weight' | 'reps' | 'completed', value: string | boolean) => {
-    const nextSets = item.sets.map((s, i) => (i === index ? { ...s, [key]: value } : s));
+    const nextSets = item.sets.map((s, i) => {
+      if (i !== index) return s;
+      if (key === 'weight') {
+        const text = (value as string) ?? '';
+        const parsed = parseFloat(text.replace(',', '.'));
+        const weightLbs = isFinite(parsed) ? (item.weightUnit === 'kg' ? parsed * LB_PER_KG : parsed) : undefined;
+        return { ...s, weight: text, weightLbs };
+      }
+      return { ...s, [key]: value } as any;
+    });
     onUpdate({ ...item, sets: nextSets });
   };
 
@@ -68,27 +78,46 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
     });
   }, [item.sets]);
 
-  const convertWeightValue = React.useCallback((valueStr: string, toUnit: 'lbs' | 'kg') => {
-    const LB_PER_KG = 2.20462;
-    const value = parseFloat((valueStr || '').replace(',', '.'));
-    if (!isFinite(value)) return valueStr || '';
-    const converted = toUnit === 'kg' ? value / LB_PER_KG : value * LB_PER_KG;
-    const rounded = Math.round(converted * 10) / 10; // one decimal place
-    const asString = rounded.toFixed(1).replace(/\.0$/, '');
-    return asString;
+  const formatFromLbs = React.useCallback((lbs: number, toUnit: 'lbs' | 'kg') => {
+    const val = toUnit === 'kg' ? lbs / LB_PER_KG : lbs;
+    const rounded = Math.round(val * 10) / 10; // display to 0.1
+    return rounded.toFixed(1).replace(/\.0$/, '');
   }, []);
 
   const handleToggleUnit = React.useCallback(() => {
     const nextUnit: 'lbs' | 'kg' = item.weightUnit === 'kg' ? 'lbs' : 'kg';
     setMenuVisible(false);
+    // If there are no positive numeric weights entered, just switch units silently
+    const hasPositiveWeight = item.sets.some((s) => {
+      const v = parseFloat((s.weight || '').replace(',', '.'));
+      return isFinite(v) && v > 0;
+    });
+    if (!hasPositiveWeight) {
+      onUpdate({ ...item, weightUnit: nextUnit });
+      return;
+    }
+    const parseToLbsFromCurrentUnit = (str: string) => {
+      const v = parseFloat((str || '').replace(',', '.'));
+      if (!isFinite(v)) return undefined;
+      return (item.weightUnit === 'kg' ? v * LB_PER_KG : v);
+    };
     const convertAndUpdate = () => {
-      const nextSets = item.sets.map((s) => ({
-        ...s,
-        weight: convertWeightValue(s.weight, nextUnit),
-      }));
+      const nextSets = item.sets.map((s) => {
+        const lbs = s.weightLbs ?? parseToLbsFromCurrentUnit(s.weight);
+        if (typeof lbs !== 'number') return s;
+        return { ...s, weight: formatFromLbs(lbs, nextUnit), weightLbs: lbs };
+      });
       onUpdate({ ...item, weightUnit: nextUnit, sets: nextSets });
     };
-    const justSwitch = () => onUpdate({ ...item, weightUnit: nextUnit });
+    const justSwitch = () => {
+      const nextSets = item.sets.map((s) => {
+        const v = parseFloat((s.weight || '').replace(',', '.'));
+        if (!isFinite(v)) return { ...s };
+        const lbs = nextUnit === 'kg' ? v * LB_PER_KG : v;
+        return { ...s, weightLbs: lbs };
+      });
+      onUpdate({ ...item, weightUnit: nextUnit, sets: nextSets });
+    };
 
     Alert.alert(
       'Change weight unit',
@@ -99,7 +128,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
         { text: 'Convert values', onPress: convertAndUpdate },
       ]
     );
-  }, [item, onUpdate, convertWeightValue]);
+  }, [item, onUpdate, formatFromLbs]);
 
   return (
     <View style={[cardStyles.cardContainer, { backgroundColor: colors.background }]}>
