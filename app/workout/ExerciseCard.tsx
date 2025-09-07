@@ -378,7 +378,7 @@ const cardStyles = StyleSheet.create({
     borderWidth: 1,
   },
   noteContainer: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 0,
     paddingBottom: 8,
   },
   noteInput: {
