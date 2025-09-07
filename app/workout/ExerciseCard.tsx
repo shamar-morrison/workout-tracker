@@ -34,6 +34,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
   const [replaceLoading, setReplaceLoading] = React.useState(false);
   const [replaceData, setReplaceData] = React.useState<Exercise[]>([]);
   const [replaceSelected, setReplaceSelected] = React.useState<string | null>(null);
+  const [showNote, setShowNote] = React.useState(!!item.note);
 
   React.useEffect(() => {
     if (!replaceVisible) return;
@@ -155,6 +156,16 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
               onPress: handleToggleUnit,
             },
             {
+              title: showNote ? 'Hide Note' : 'Add Note',
+              onPress: () => {
+                setMenuVisible(false);
+                setShowNote((prev) => !prev);
+                if (!showNote) {
+                  onUpdate({ ...item, note: item.note || '' });
+                }
+              },
+            },
+            {
               title: 'Replace exercise',
               onPress: () => {
                 setMenuVisible(false);
@@ -174,6 +185,25 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
           anchorY={menuAnchorY}
         />
       </View>
+      {showNote ? (
+        <View style={cardStyles.noteContainer}>
+          {(() => {
+            let noteInput: any = null;
+            return (
+              <TextInput
+                ref={(r) => { noteInput = r; }}
+                style={[cardStyles.noteInput, { color: colors.text, borderColor: Colors[colorScheme ?? 'light'].icon }]}
+                placeholder="Write a note"
+                placeholderTextColor={Colors[colorScheme ?? 'light'].icon}
+                value={item.note || ''}
+                onChangeText={(t) => onUpdate({ ...item, note: t })}
+                onFocus={() => { onInputFocus && onInputFocus(() => noteInput?.focus()); }}
+                multiline
+              />
+            );
+          })()}
+        </View>
+      ) : null}
 
       <View style={cardStyles.headersRow}>
         <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 40 }]}>SET</ThemedText>
@@ -346,6 +376,18 @@ const cardStyles = StyleSheet.create({
     borderRadius: 12,
     borderColor: '#f0f0f0',
     borderWidth: 1,
+  },
+  noteContainer: {
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+  },
+  noteInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 40,
+    marginBottom: 8,
   },
   title: {
     fontSize: 16,

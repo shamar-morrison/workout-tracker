@@ -18,6 +18,7 @@ export type WorkoutExercise = {
 	exercise: Exercise;
 	sets: WorkoutSet[];
 	weightUnit?: 'lbs' | 'kg';
+	note?: string;
 };
 
 type SessionState = {

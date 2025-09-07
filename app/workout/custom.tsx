@@ -3,20 +3,21 @@ import { Image } from 'expo-image';
 import { router, Stack } from 'expo-router';
 import React from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Keyboard,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    InteractionManager,
+    Keyboard,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import CustomHeader from '@/components/CustomHeader';
@@ -240,6 +241,31 @@ export default function CustomWorkoutScreen() {
     return () => { (global as any).__customWorkoutListRef = null; };
   }, []);
 
+  const pendingRefocus = React.useRef<(() => void) | null>(null);
+  const pendingTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleRefocus = React.useCallback((fn: () => void) => {
+    if (pendingTimer.current) clearTimeout(pendingTimer.current);
+    pendingRefocus.current = fn;
+    pendingTimer.current = setTimeout(() => {
+      if (pendingRefocus.current) {
+        const cb = pendingRefocus.current;
+        pendingRefocus.current = null;
+        cb();
+      }
+    }, 260);
+  }, []);
+  const flushRefocus = React.useCallback(() => {
+    if (pendingTimer.current) {
+      clearTimeout(pendingTimer.current);
+      pendingTimer.current = null;
+    }
+    if (pendingRefocus.current) {
+      const cb = pendingRefocus.current;
+      pendingRefocus.current = null;
+      InteractionManager.runAfterInteractions(() => cb());
+    }
+  }, []);
+
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -288,6 +314,8 @@ export default function CustomWorkoutScreen() {
               keyboardDismissMode="none"
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingBottom: keyboardHeight + 24 }}
+              onMomentumScrollEnd={flushRefocus}
+              onScrollEndDrag={flushRefocus}
               renderItem={({ item, index }) => (
                 <ExerciseCardItem
                   item={item}
@@ -298,13 +326,12 @@ export default function CustomWorkoutScreen() {
                       // For the last item, scroll it to the top so inputs have max space above keyboard
                       const isLast = index === session.exercises.length - 1;
                       scrollRef.scrollToIndex({ index, viewPosition: isLast ? 0 : 0.1, animated: true });
-                      // Re-focus after scroll finishes to avoid focus being stolen by other inputs
-                      setTimeout(() => { try { refocus?.(); } catch {} }, 180);
+                      if (refocus) scheduleRefocus(refocus);
                     } catch {
                       // fallback in case measurement isn't ready
                       const current = scrollRef._scrollMetrics?.offset || 0;
                       scrollRef.scrollToOffset?.({ offset: current + 120, animated: true });
-                      setTimeout(() => { try { refocus?.(); } catch {} }, 120);
+                      if (refocus) scheduleRefocus(refocus);
                     }
                   }}
                   onUpdate={(updated) => {
