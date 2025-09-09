@@ -3,15 +3,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
 import {
-  Keyboard,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Keyboard,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
@@ -32,10 +32,19 @@ type MenuItem = {
   destructive?: boolean;
 };
 
+type RightTextButton = {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  color?: string;
+};
+
 type HeaderProps = {
   title: string;
   showBackButton?: boolean;
   rightIcons?: IconProps[];
+  rightTextButton?: RightTextButton;
+  onBackPress?: () => void;
   enableSearch?: boolean;
   initialQuery?: string;
   onSearchQueryChange?: (text: string) => void;
@@ -52,6 +61,8 @@ export default function CustomHeader({
   title,
   showBackButton = false,
   rightIcons,
+  rightTextButton,
+  onBackPress,
   enableSearch = false,
   initialQuery = '',
   onSearchQueryChange,
@@ -113,6 +124,10 @@ export default function CustomHeader({
   }, [query, debounceMs, enableSearch, onSearchQueryChange]);
 
   const handleBack = () => {
+    if (onBackPress) {
+      onBackPress();
+      return;
+    }
     if (router.canGoBack()) {
       router.back();
     }
@@ -174,6 +189,24 @@ export default function CustomHeader({
           </View>
         ) : null}
         <View style={styles.rightContainer}>
+          {rightTextButton ? (
+            <TouchableOpacity
+              onPress={rightTextButton.onPress}
+              disabled={rightTextButton.disabled}
+              style={styles.textButton}
+            >
+              <Text
+                style={{
+                  color: rightTextButton.color || colors.text,
+                  fontWeight: '600',
+                  fontSize: 16,
+                  opacity: rightTextButton.disabled ? 0.5 : 1,
+                }}
+              >
+                {rightTextButton.label}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
           {combinedRightIcons.map((icon, index) => (
             <TouchableOpacity key={index} onPress={icon.onPress} style={styles.icon}>
               <Ionicons name={icon.name} size={icon.size || 24} color={icon.color || colors.text} />
@@ -216,9 +249,10 @@ export default function CustomHeader({
         <Pressable
           style={{ flex: 1 }}
           onPress={() => {
-            if (isKeyboardVisible.current) {
-              Keyboard.dismiss();
-            } else if (shouldDeactivateOnOutsidePress) {
+            // Only deactivate search mode when keyboard is NOT visible.
+            // Avoid dismissing the keyboard on content presses to prevent
+            // focus conflicts with in-list inputs.
+            if (!isKeyboardVisible.current && shouldDeactivateOnOutsidePress) {
               setIsSearchActive(false);
               if (onSearchToggle) onSearchToggle(false);
             }
@@ -266,6 +300,9 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 20,
+  },
+  textButton: {
+    marginLeft: 10,
   },
   searchContainer: {
     flex: 1,
