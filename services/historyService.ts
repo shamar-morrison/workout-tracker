@@ -7,6 +7,8 @@ export type CompletedExerciseSummary = {
   name: string;
   setCount: number;
   bestSet: CompletedSet | null;
+  // Optional list of all completed sets for richer detail views; may be absent in older entries
+  sets?: CompletedSet[];
 };
 
 export type CompletedWorkout = {

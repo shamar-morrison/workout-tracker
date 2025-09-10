@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
@@ -29,7 +30,11 @@ export default function HistoryScreen() {
         data={items}
         keyExtractor={(i) => i.id}
         renderItem={({ item }) => (
-          <View style={[styles.card, { borderColor: colors.icon }]}> 
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push({ pathname: '/history/[id]', params: { id: item.id } })}
+            style={[styles.card, { borderColor: colors.icon }]}
+          >
             <Text style={[styles.cardTitle, { color: colors.text }]}>{item.name}</Text>
             <Text style={{ color: colors.icon, marginBottom: 8 }}>
               {new Date(item.completedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
@@ -62,7 +67,7 @@ export default function HistoryScreen() {
                 </Text>
               </View>
             ))}
-          </View>
+          </TouchableOpacity>
         )}
       />
     </ThemedView>

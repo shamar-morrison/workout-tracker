@@ -39,6 +39,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="exercise/create" options={{ headerShown: false }} />
               <Stack.Screen name="workout/custom" options={{ headerShown: false }} />
+              <Stack.Screen name="history/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
             {/* Banner moved into custom TabBar */}
