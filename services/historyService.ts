@@ -67,7 +67,9 @@ function compareSets(a: CompletedSet | null, b: CompletedSet | null): number {
   return (a as CompletedSet).reps - (b as CompletedSet).reps;
 }
 
-export async function recordCompletedWorkout(input: Omit<CompletedWorkout, 'id' | 'prs'>): Promise<{ id: string; workoutNumber: number; prs: number }> {
+export async function recordCompletedWorkout(
+  input: Omit<CompletedWorkout, 'id' | 'prs'>,
+): Promise<{ id: string; workoutNumber: number; prs: number }> {
   const history = await loadHistory();
 
   // Build previous best by exercise
@@ -92,5 +94,3 @@ export async function recordCompletedWorkout(input: Omit<CompletedWorkout, 'id' 
   await saveHistory(nextHistory);
   return { id, workoutNumber: nextHistory.length, prs };
 }
-
-

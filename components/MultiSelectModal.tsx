@@ -1,6 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+
 import { FlatList, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
   visible: boolean;
@@ -16,7 +18,19 @@ type Props = {
   noneLabel?: string;
 };
 
-export default function MultiSelectModal({ visible, onClose, items, selected, onConfirm, title = 'Select items', okText = 'OK', cancelText = 'Cancel', single = false, includeNoneOption = false, noneLabel = 'None' }: Props) {
+export default function MultiSelectModal({
+  visible,
+  onClose,
+  items,
+  selected,
+  onConfirm,
+  title = 'Select items',
+  okText = 'OK',
+  cancelText = 'Cancel',
+  single = false,
+  includeNoneOption = false,
+  noneLabel = 'None',
+}: Props) {
   const [localSelected, setLocalSelected] = React.useState<string[]>(selected);
 
   React.useEffect(() => {
@@ -27,7 +41,9 @@ export default function MultiSelectModal({ visible, onClose, items, selected, on
     if (single) {
       setLocalSelected([value]);
     } else {
-      setLocalSelected((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+      setLocalSelected((prev) =>
+        prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+      );
     }
   };
 
@@ -45,12 +61,17 @@ export default function MultiSelectModal({ visible, onClose, items, selected, on
               if (item === '__NONE__') {
                 const isSelected = localSelected.length === 0;
                 return (
-                  <TouchableOpacity
-                    style={styles.row}
-                    onPress={() => setLocalSelected([])}
-                  >
+                  <TouchableOpacity style={styles.row} onPress={() => setLocalSelected([])}>
                     <Ionicons
-                      name={single ? (isSelected ? 'radio-button-on' : 'radio-button-off') : (isSelected ? 'checkmark-circle' : 'ellipse-outline')}
+                      name={
+                        single
+                          ? isSelected
+                            ? 'radio-button-on'
+                            : 'radio-button-off'
+                          : isSelected
+                            ? 'checkmark-circle'
+                            : 'ellipse-outline'
+                      }
                       size={20}
                       color={isSelected ? '#0a7ea4' : '#9BA1A6'}
                       style={{ marginRight: 12 }}
@@ -64,7 +85,15 @@ export default function MultiSelectModal({ visible, onClose, items, selected, on
               return (
                 <TouchableOpacity style={styles.row} onPress={() => toggle(item)}>
                   <Ionicons
-                    name={single ? (isSelected ? 'radio-button-on' : 'radio-button-off') : (isSelected ? 'checkmark-circle' : 'ellipse-outline')}
+                    name={
+                      single
+                        ? isSelected
+                          ? 'radio-button-on'
+                          : 'radio-button-off'
+                        : isSelected
+                          ? 'checkmark-circle'
+                          : 'ellipse-outline'
+                    }
                     size={20}
                     color={isSelected ? '#0a7ea4' : '#9BA1A6'}
                     style={{ marginRight: 12 }}
@@ -84,7 +113,9 @@ export default function MultiSelectModal({ visible, onClose, items, selected, on
                 setTimeout(() => onConfirm(localSelected), 0);
               }}
             >
-              <Text style={[styles.actionText, { color: '#0a7ea4', fontWeight: '600' }]}>{okText}</Text>
+              <Text style={[styles.actionText, { color: '#0a7ea4', fontWeight: '600' }]}>
+                {okText}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

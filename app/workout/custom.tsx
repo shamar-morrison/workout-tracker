@@ -1,33 +1,37 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { router, Stack } from 'expo-router';
 import React from 'react';
+
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    InteractionManager,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  InteractionManager,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+import { Image } from 'expo-image';
+import { Stack, router } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
 
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import { useWorkoutSession, WorkoutExercise } from '@/context/WorkoutSessionContext';
+import { WorkoutExercise, useWorkoutSession } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import { recordCompletedWorkout } from '@/services/historyService';
+
 import ExerciseCardItem from './ExerciseCard';
 
 export default function CustomWorkoutScreen() {
@@ -57,11 +61,20 @@ export default function CustomWorkoutScreen() {
   // Track keyboard height to pad list so last inputs stay visible
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
   React.useEffect(() => {
-    const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
-      setKeyboardHeight(e.endCoordinates?.height ?? 0);
-    });
-    const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardHeight(0));
-    return () => { showSub.remove(); hideSub.remove(); };
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates?.height ?? 0);
+      },
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0),
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   // Ensure a session exists and keep timer ticking from session.startTime
@@ -104,7 +117,10 @@ export default function CustomWorkoutScreen() {
 
   const toTitleCase = React.useCallback((str: string) => {
     if (!str) return '';
-    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    return str.replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+    );
   }, []);
 
   const formattedTime = React.useMemo(() => {
@@ -143,16 +159,20 @@ export default function CustomWorkoutScreen() {
       return;
     }
 
-    const isValid = (s: { weight: string; reps: string }) => /\d/.test((s.weight ?? '').trim()) && /\d/.test((s.reps ?? '').trim());
+    const isValid = (s: { weight: string; reps: string }) =>
+      /\d/.test((s.weight ?? '').trim()) && /\d/.test((s.reps ?? '').trim());
 
-    const completedSets = session.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.completed).length, 0);
+    const completedSets = session.exercises.reduce(
+      (acc, ex) => acc + ex.sets.filter((s) => s.completed).length,
+      0,
+    );
     const validNotCompleted = session.exercises.reduce(
       (acc, ex) => acc + ex.sets.filter((s) => !s.completed && isValid(s)).length,
-      0
+      0,
     );
     const invalidSets = session.exercises.reduce(
       (acc, ex) => acc + ex.sets.filter((s) => !s.completed && !isValid(s)).length,
-      0
+      0,
     );
 
     // No completed or valid sets at all
@@ -176,31 +196,35 @@ export default function CustomWorkoutScreen() {
         .filter((ex) => ex.sets.length > 0);
 
       // Build summary metrics
-      const durationSec = Math.max(0, Math.floor(((Date.now()) - (session.startTime ?? Date.now())) / 1000));
+      const durationSec = Math.max(
+        0,
+        Math.floor((Date.now() - (session.startTime ?? Date.now())) / 1000),
+      );
       let totalVolume = 0;
-      const exercisesSummary = cleaned.map((ex) => {
-        let best: { weight: number; reps: number } | null = null;
-        let setCount = 0;
-        for (const s of ex.sets) {
-          const weight = parseFloat(s.weight || '0');
-          const reps = parseInt(s.reps || '0', 10);
-          if (weight > 0 && reps > 0) {
-            totalVolume += weight * reps;
-            setCount += 1;
-            if (!best || weight > best.weight || (weight === best.weight && reps > best.reps)) {
-              best = { weight, reps };
+      const exercisesSummary = cleaned
+        .map((ex) => {
+          let best: { weight: number; reps: number } | null = null;
+          let setCount = 0;
+          for (const s of ex.sets) {
+            const weight = parseFloat(s.weight || '0');
+            const reps = parseInt(s.reps || '0', 10);
+            if (weight > 0 && reps > 0) {
+              totalVolume += weight * reps;
+              setCount += 1;
+              if (!best || weight > best.weight || (weight === best.weight && reps > best.reps)) {
+                best = { weight, reps };
+              }
             }
           }
-        }
-        return {
-          exerciseId: ex.exercise.exerciseId,
-          name: ex.exercise.name,
-          setCount,
-          bestSet: best,
-        };
-      })
-      // Save only exercises with at least one valid/completed set
-      .filter((ex) => ex.setCount > 0);
+          return {
+            exerciseId: ex.exercise.exerciseId,
+            name: ex.exercise.name,
+            setCount,
+            bestSet: best,
+          };
+        })
+        // Save only exercises with at least one valid/completed set
+        .filter((ex) => ex.setCount > 0);
 
       const { id, workoutNumber, prs } = await recordCompletedWorkout({
         name: session.name,
@@ -234,11 +258,13 @@ export default function CustomWorkoutScreen() {
   const listRef = React.useRef<FlatList<any> | null>(null);
   // expose ref for child callback usage without prop-drilling through wrappers
   // (kept simple; not meant for general global usage)
-  ;(global as any).__customWorkoutListRef = null;
+  (global as any).__customWorkoutListRef = null;
 
   React.useEffect(() => {
     (global as any).__customWorkoutListRef = listRef.current;
-    return () => { (global as any).__customWorkoutListRef = null; };
+    return () => {
+      (global as any).__customWorkoutListRef = null;
+    };
   }, []);
 
   const pendingRefocus = React.useRef<(() => void) | null>(null);
@@ -290,7 +316,12 @@ export default function CustomWorkoutScreen() {
       >
         <ThemedView style={styles.inner}>
           <View style={styles.timerRow}>
-            <Ionicons name="time-outline" size={18} color={colors.text} style={{ marginRight: 8 }} />
+            <Ionicons
+              name="time-outline"
+              size={18}
+              color={colors.text}
+              style={{ marginRight: 8 }}
+            />
             <ThemedText style={styles.timerText}>{formattedTime}</ThemedText>
           </View>
 
@@ -306,9 +337,15 @@ export default function CustomWorkoutScreen() {
             multiline
           />
 
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
             <FlatList
-              ref={(r) => { listRef.current = r as any; (global as any).__customWorkoutListRef = r; }}
+              ref={(r) => {
+                listRef.current = r as any;
+                (global as any).__customWorkoutListRef = r;
+              }}
               data={session.exercises}
               keyExtractor={(item) => item.id}
               keyboardDismissMode="none"
@@ -325,7 +362,11 @@ export default function CustomWorkoutScreen() {
                     try {
                       // For the last item, scroll it to the top so inputs have max space above keyboard
                       const isLast = index === session.exercises.length - 1;
-                      scrollRef.scrollToIndex({ index, viewPosition: isLast ? 0 : 0.1, animated: true });
+                      scrollRef.scrollToIndex({
+                        index,
+                        viewPosition: isLast ? 0 : 0.1,
+                        animated: true,
+                      });
                       if (refocus) scheduleRefocus(refocus);
                     } catch {
                       // fallback in case measurement isn't ready
@@ -335,7 +376,9 @@ export default function CustomWorkoutScreen() {
                     }
                   }}
                   onUpdate={(updated) => {
-                    const nextExercises = session.exercises.map((ex) => (ex.id === updated.id ? updated : ex));
+                    const nextExercises = session.exercises.map((ex) =>
+                      ex.id === updated.id ? updated : ex,
+                    );
                     update({ exercises: nextExercises });
                   }}
                   onRemove={() => {
@@ -363,7 +406,6 @@ export default function CustomWorkoutScreen() {
                   >
                     <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
                   </TouchableOpacity>
-
                 </View>
               )}
             />
@@ -372,9 +414,17 @@ export default function CustomWorkoutScreen() {
       </CustomHeader>
 
       {/* Edit details sheet */}
-      <Modal visible={editSheetVisible} transparent animationType="slide" onRequestClose={() => setEditSheetVisible(false)}>
+      <Modal
+        visible={editSheetVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditSheetVisible(false)}
+      >
         <Pressable style={styles.sheetBackdrop} onPress={() => setEditSheetVisible(false)}>
-          <Pressable style={[styles.sheet, { backgroundColor: colors.background }]} onPress={(e) => e.stopPropagation()}>
+          <Pressable
+            style={[styles.sheet, { backgroundColor: colors.background }]}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={[styles.sheetTitle, { color: colors.text }]}>Edit details</Text>
             <Text style={[styles.label, { color: colors.text }]}>Name</Text>
             <TextInput
@@ -411,7 +461,10 @@ export default function CustomWorkoutScreen() {
             >
               <Text style={styles.sheetButtonText}>Reset timer</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.sheetButton, { backgroundColor: '#0a7ea4' }]} onPress={() => setEditSheetVisible(false)}>
+            <TouchableOpacity
+              style={[styles.sheetButton, { backgroundColor: '#0a7ea4' }]}
+              onPress={() => setEditSheetVisible(false)}
+            >
               <Text style={styles.sheetButtonText}>Done</Text>
             </TouchableOpacity>
           </Pressable>
@@ -419,7 +472,11 @@ export default function CustomWorkoutScreen() {
       </Modal>
 
       {/* Exercise picker - full screen with search, gifs, multi-select */}
-      <Modal visible={pickerVisible} animationType="slide" onRequestClose={() => setPickerVisible(false)}>
+      <Modal
+        visible={pickerVisible}
+        animationType="slide"
+        onRequestClose={() => setPickerVisible(false)}
+      >
         <CustomHeader
           title="Add exercises"
           showBackButton
@@ -429,10 +486,12 @@ export default function CustomWorkoutScreen() {
           initialQuery={search}
           onSearchQueryChange={setSearch}
           menuOpenOnTap
-          menuItems={[{
-            title: 'Create Exercise',
-            onPress: () => router.push('/exercise/create'),
-          }]}
+          menuItems={[
+            {
+              title: 'Create Exercise',
+              onPress: () => router.push('/exercise/create'),
+            },
+          ]}
           rightTextButton={{
             label: `ADD (${pickerSelected.size})`,
             disabled: pickerSelected.size === 0,
@@ -468,8 +527,11 @@ export default function CustomWorkoutScreen() {
                   const rankIndex = selectionOrder.indexOf(item.exerciseId);
                   const isSelected = rankIndex !== -1;
                   const isLetter = item.gifUrl?.startsWith('letter://');
-                  const letter = isLetter ? item.gifUrl.replace('letter://', '').slice(0, 1) || 'X' : 'X';
-                  const selectedBg = (colorScheme === 'dark') ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
+                  const letter = isLetter
+                    ? item.gifUrl.replace('letter://', '').slice(0, 1) || 'X'
+                    : 'X';
+                  const selectedBg =
+                    colorScheme === 'dark' ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
                   return (
                     <TouchableOpacity
                       onPress={() => {
@@ -480,19 +542,26 @@ export default function CustomWorkoutScreen() {
                           return next;
                         });
                       }}
-                      style={[styles.exerciseContainer, isSelected && { backgroundColor: selectedBg }]}
+                      style={[
+                        styles.exerciseContainer,
+                        isSelected && { backgroundColor: selectedBg },
+                      ]}
                     >
                       <View style={styles.imageWrapper}>
                         {isSelected ? (
-                          <View style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 14,
-                            backgroundColor: colors.tint,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}>
-                            <Text style={{ color: '#fff', fontWeight: '700' }}>{rankIndex + 1}</Text>
+                          <View
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 14,
+                              backgroundColor: colors.tint,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Text style={{ color: '#fff', fontWeight: '700' }}>
+                              {rankIndex + 1}
+                            </Text>
                           </View>
                         ) : isLetter ? (
                           <View style={styles.letterAvatar}>
@@ -503,8 +572,12 @@ export default function CustomWorkoutScreen() {
                         )}
                       </View>
                       <View style={styles.exerciseDetails}>
-                        <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
-                        <ThemedText style={styles.exerciseBodyPart}>{toTitleCase(item.bodyParts?.join(', ') || '')}</ThemedText>
+                        <ThemedText style={styles.exerciseName}>
+                          {toTitleCase(item.name)}
+                        </ThemedText>
+                        <ThemedText style={styles.exerciseBodyPart}>
+                          {toTitleCase(item.bodyParts?.join(', ') || '')}
+                        </ThemedText>
                       </View>
                     </TouchableOpacity>
                   );
@@ -696,5 +769,3 @@ const styles = StyleSheet.create({
     borderBottomColor: '#2d2d2d',
   },
 });
-
-

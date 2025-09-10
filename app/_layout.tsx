@@ -1,17 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useEffect, useRef } from 'react';
+
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+
+import { ExpoContextMenuProvider } from '@appandflow/expo-context-menu';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import 'react-native-reanimated';
 
 // Active banner is now integrated into TabBar; keeping import commented if needed in future
 // import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { dismissWorkoutNotification, setupNotificationChannels } from '@/services/notificationService';
-import { ExpoContextMenuProvider } from '@appandflow/expo-context-menu';
-import * as Notifications from 'expo-notifications';
-import { useEffect, useRef } from 'react';
+import {
+  dismissWorkoutNotification,
+  setupNotificationChannels,
+} from '@/services/notificationService';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

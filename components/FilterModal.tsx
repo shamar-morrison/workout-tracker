@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Props = {
@@ -11,7 +12,15 @@ type Props = {
   allLabel?: string;
 };
 
-export default function FilterModal({ visible, onClose, items, selected, onSelect, title = 'Filter', allLabel = 'All' }: Props) {
+export default function FilterModal({
+  visible,
+  onClose,
+  items,
+  selected,
+  onSelect,
+  title = 'Filter',
+  allLabel = 'All',
+}: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.backdrop}>
@@ -31,7 +40,8 @@ export default function FilterModal({ visible, onClose, items, selected, onSelec
               return (
                 <TouchableOpacity
                   style={[styles.row, isSelected && styles.rowSelected]}
-                  onPress={() => onSelect(item ?? null)}>
+                  onPress={() => onSelect(item ?? null)}
+                >
                   <Text style={styles.rowText}>{label}</Text>
                 </TouchableOpacity>
               );

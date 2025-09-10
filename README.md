@@ -22,19 +22,20 @@ An Expo Router app for browsing exercises, viewing details, and creating your ow
 
 ## Getting Started
 
-1) Install dependencies
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-2) Start the development server
+2. Start the development server
 
 ```bash
 npm run start
 ```
 
 Then choose one of:
+
 - Android Emulator: `a` in the terminal or `npm run android`
 - iOS Simulator (macOS): `i` in the terminal or `npm run ios`
 - Web: `w` in the terminal or `npm run web`
@@ -99,4 +100,3 @@ Routing uses Expo Router with typed routes (`app.json` enables `experiments.type
 - If images don’t appear, ensure network access for the simulator/emulator
 - If local custom exercises don’t show, verify storage permissions and try reinstalling the app to clear caches
 - iOS simulators may require a clean build if native modules were updated
-

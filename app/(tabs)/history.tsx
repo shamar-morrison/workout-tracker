@@ -1,7 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import React from 'react';
+
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { router } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
 
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
@@ -37,16 +40,24 @@ export default function HistoryScreen() {
           >
             <Text style={[styles.cardTitle, { color: colors.text }]}>{item.name}</Text>
             <Text style={{ color: colors.icon, marginBottom: 8 }}>
-              {new Date(item.completedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+              {new Date(item.completedAt).toLocaleDateString(undefined, {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </Text>
             <View style={styles.metricsRow}>
               <View style={styles.metric}>
                 <Ionicons name="time-outline" size={18} color={colors.text} />
-                <Text style={[styles.metricText, { color: colors.text }]}>{formatDuration(item.durationSec)}</Text>
+                <Text style={[styles.metricText, { color: colors.text }]}>
+                  {formatDuration(item.durationSec)}
+                </Text>
               </View>
               <View style={styles.metric}>
                 <Ionicons name="barbell-outline" size={18} color={colors.text} />
-                <Text style={[styles.metricText, { color: colors.text }]}>{item.totalVolume} kg</Text>
+                <Text style={[styles.metricText, { color: colors.text }]}>
+                  {item.totalVolume} kg
+                </Text>
               </View>
               <View style={styles.metric}>
                 <Ionicons name="trophy-outline" size={18} color={colors.text} />
@@ -60,7 +71,9 @@ export default function HistoryScreen() {
             </View>
             {item.exercises.map((ex) => (
               <View key={ex.exerciseId} style={styles.exerciseRow}>
-                <Text style={[styles.exerciseName, { color: colors.text }]}>{ex.name.replace(/\w\S*/g, (t) => t[0].toUpperCase() + t.slice(1).toLowerCase())}</Text>
+                <Text style={[styles.exerciseName, { color: colors.text }]}>
+                  {ex.name.replace(/\w\S*/g, (t) => t[0].toUpperCase() + t.slice(1).toLowerCase())}
+                </Text>
                 <View style={{ flex: 1 }} />
                 <Text style={[styles.bestSet, { color: colors.text }]}>
                   {ex.bestSet ? `${ex.bestSet.weight} kg × ${ex.bestSet.reps}` : '—'}
@@ -83,7 +96,13 @@ const styles = StyleSheet.create({
   metricText: { fontWeight: '600' },
   exHeaderRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, paddingBottom: 4 },
   sectionTitle: { marginTop: 0, fontWeight: '700' },
-  exerciseRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderTopWidth: StyleSheet.hairlineWidth, borderColor: '#ccc' },
+  exerciseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: '#ccc',
+  },
   exerciseName: { fontWeight: '400' },
   bestSet: { marginLeft: 12, fontWeight: '400' },
 });

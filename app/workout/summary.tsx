@@ -1,7 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
+
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedView } from '@/components/ThemedView';
@@ -34,24 +38,40 @@ export default function WorkoutSummaryScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: Math.max(16, insets.top + 8), paddingBottom: Math.max(24, insets.bottom + 24) }}>
-        <View style={[styles.banner, { backgroundColor: colors.tint }]}> 
+      <ScrollView
+        contentContainerStyle={{
+          padding: 16,
+          paddingTop: Math.max(16, insets.top + 8),
+          paddingBottom: Math.max(24, insets.bottom + 24),
+        }}
+      >
+        <View style={[styles.banner, { backgroundColor: colors.tint }]}>
           <Text style={styles.bannerTitle}>Congratulations!</Text>
           <Text style={styles.bannerSub}>That’s your workout number</Text>
         </View>
 
-        <View style={[styles.card, { borderColor: colors.icon }]}> 
+        <View style={[styles.card, { borderColor: colors.icon }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>{workout.name}</Text>
-          <Text style={{ color: colors.icon, marginBottom: 8 }}>{new Date(workout.completedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
+          <Text style={{ color: colors.icon, marginBottom: 8 }}>
+            {new Date(workout.completedAt).toLocaleDateString(undefined, {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </Text>
 
           <View style={styles.metricsRow}>
             <View style={styles.metric}>
               <Ionicons name="time-outline" size={18} color={colors.text} />
-              <Text style={[styles.metricText, { color: colors.text }]}>{formatDuration(workout.durationSec)}</Text>
+              <Text style={[styles.metricText, { color: colors.text }]}>
+                {formatDuration(workout.durationSec)}
+              </Text>
             </View>
             <View style={styles.metric}>
               <Ionicons name="barbell-outline" size={18} color={colors.text} />
-              <Text style={[styles.metricText, { color: colors.text }]}>{workout.totalVolume} kg</Text>
+              <Text style={[styles.metricText, { color: colors.text }]}>
+                {workout.totalVolume} kg
+              </Text>
             </View>
             <View style={styles.metric}>
               <Ionicons name="trophy-outline" size={18} color={colors.text} />
@@ -66,7 +86,9 @@ export default function WorkoutSummaryScreen() {
           </View>
           {workout.exercises.map((ex) => (
             <View key={ex.exerciseId} style={styles.exerciseRow}>
-              <Text style={[styles.exerciseName, { color: colors.text }]}>{ex.name.replace(/\w\S*/g, (t) => t[0].toUpperCase() + t.slice(1).toLowerCase())}</Text>
+              <Text style={[styles.exerciseName, { color: colors.text }]}>
+                {ex.name.replace(/\w\S*/g, (t) => t[0].toUpperCase() + t.slice(1).toLowerCase())}
+              </Text>
               <View style={{ flex: 1 }} />
               <Text style={[styles.bestSet, { color: colors.text }]}>
                 {ex.bestSet ? `${ex.bestSet.weight} kg × ${ex.bestSet.reps}` : '—'}
@@ -151,5 +173,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-

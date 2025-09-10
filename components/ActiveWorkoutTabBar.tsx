@@ -1,7 +1,10 @@
-import { BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useRouter } from 'expo-router';
 import React from 'react';
+
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { useRouter } from 'expo-router';
+
+import { BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { Colors } from '@/constants/Colors';
 import { useWorkoutSession } from '@/context/WorkoutSessionContext';
@@ -74,5 +77,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-
-

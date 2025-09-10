@@ -1,16 +1,32 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React from 'react';
-import { ActivityIndicator, Alert, Animated, FlatList, Modal, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
+
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  FlatList,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { Image } from 'expo-image';
+
+import { Ionicons } from '@expo/vector-icons';
+
 import { Swipeable } from 'react-native-gesture-handler';
 
+import CustomHeader from '@/components/CustomHeader';
 import SimpleMenu from '@/components/SimpleMenu';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-import CustomHeader from '@/components/CustomHeader';
 import { WorkoutExercise } from '@/context/WorkoutSessionContext';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 
 type ExerciseCardProps = {
@@ -20,7 +36,12 @@ type ExerciseCardProps = {
   onInputFocus?: (refocus: () => void) => void;
 };
 
-export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }: ExerciseCardProps) {
+export default function ExerciseCard({
+  item,
+  onUpdate,
+  onRemove,
+  onInputFocus,
+}: ExerciseCardProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -41,24 +62,41 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
     let cancelled = false;
     setReplaceLoading(true);
     fetchExercises(25, replaceSearch)
-      .then((data) => { if (!cancelled) setReplaceData(data); })
-      .finally(() => { if (!cancelled) setReplaceLoading(false); });
-    return () => { cancelled = true; };
+      .then((data) => {
+        if (!cancelled) setReplaceData(data);
+      })
+      .finally(() => {
+        if (!cancelled) setReplaceLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [replaceVisible, replaceSearch]);
 
   const toTitleCase = React.useCallback((str: string) => {
     if (!str) return '';
-    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    return str.replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+    );
   }, []);
 
   const LB_PER_KG = 2.20462;
-  const handleChangeSet = (index: number, key: 'weight' | 'reps' | 'completed', value: string | boolean) => {
+  const handleChangeSet = (
+    index: number,
+    key: 'weight' | 'reps' | 'completed',
+    value: string | boolean,
+  ) => {
     const nextSets = item.sets.map((s, i) => {
       if (i !== index) return s;
       if (key === 'weight') {
         const text = (value as string) ?? '';
         const parsed = parseFloat(text.replace(',', '.'));
-        const weightLbs = isFinite(parsed) ? (item.weightUnit === 'kg' ? parsed * LB_PER_KG : parsed) : undefined;
+        const weightLbs = isFinite(parsed)
+          ? item.weightUnit === 'kg'
+            ? parsed * LB_PER_KG
+            : parsed
+          : undefined;
         return { ...s, weight: text, weightLbs };
       }
       return { ...s, [key]: value } as any;
@@ -100,7 +138,7 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
     const parseToLbsFromCurrentUnit = (str: string) => {
       const v = parseFloat((str || '').replace(',', '.'));
       if (!isFinite(v)) return undefined;
-      return (item.weightUnit === 'kg' ? v * LB_PER_KG : v);
+      return item.weightUnit === 'kg' ? v * LB_PER_KG : v;
     };
     const convertAndUpdate = () => {
       const nextSets = item.sets.map((s) => {
@@ -127,14 +165,16 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
         { text: 'Cancel', style: 'cancel' },
         { text: 'Just switch', onPress: justSwitch },
         { text: 'Convert values', onPress: convertAndUpdate },
-      ]
+      ],
     );
   }, [item, onUpdate, formatFromLbs]);
 
   return (
     <View style={[cardStyles.cardContainer, { backgroundColor: colors.background }]}>
       <View style={cardStyles.headerRow}>
-        <ThemedText style={[cardStyles.title, { color: colors.text }]}>{toTitleCase(item.exercise.name)}</ThemedText>
+        <ThemedText style={[cardStyles.title, { color: colors.text }]}>
+          {toTitleCase(item.exercise.name)}
+        </ThemedText>
         <TouchableOpacity
           onPress={() => {
             menuIconRef.current?.measureInWindow((_x, y, _w, h) => {
@@ -177,7 +217,9 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
               destructive: hasData,
               onPress: onRemove,
               confirmTitle: hasData ? 'Remove exercise?' : undefined,
-              confirmMessage: hasData ? 'This will delete any recorded sets for this exercise.' : undefined,
+              confirmMessage: hasData
+                ? 'This will delete any recorded sets for this exercise.'
+                : undefined,
               confirmConfirmText: hasData ? 'Remove' : undefined,
               confirmCancelText: hasData ? 'Cancel' : undefined,
             },
@@ -191,13 +233,20 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
             let noteInput: any = null;
             return (
               <TextInput
-                ref={(r) => { noteInput = r; }}
-                style={[cardStyles.noteInput, { color: colors.text, borderColor: Colors[colorScheme ?? 'light'].icon }]}
+                ref={(r) => {
+                  noteInput = r;
+                }}
+                style={[
+                  cardStyles.noteInput,
+                  { color: colors.text, borderColor: Colors[colorScheme ?? 'light'].icon },
+                ]}
                 placeholder="Write a note"
                 placeholderTextColor={Colors[colorScheme ?? 'light'].icon}
                 value={item.note || ''}
                 onChangeText={(t) => onUpdate({ ...item, note: t })}
-                onFocus={() => { onInputFocus && onInputFocus(() => noteInput?.focus()); }}
+                onFocus={() => {
+                  onInputFocus && onInputFocus(() => noteInput?.focus());
+                }}
                 multiline
               />
             );
@@ -206,10 +255,18 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
       ) : null}
 
       <View style={cardStyles.headersRow}>
-        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 40 }]}>SET</ThemedText>
-        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { flex: 1 }]}>PREVIOUS</ThemedText>
-        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>{(item.weightUnit || 'lbs').toUpperCase()}</ThemedText>
-        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>REPS</ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 40 }]}>
+          SET
+        </ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { flex: 1 }]}>
+          PREVIOUS
+        </ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>
+          {(item.weightUnit || 'lbs').toUpperCase()}
+        </ThemedText>
+        <ThemedText numberOfLines={1} style={[cardStyles.headerLabel, { width: 70 }]}>
+          REPS
+        </ThemedText>
         <View style={{ width: 36 }} />
       </View>
 
@@ -217,9 +274,13 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
         <Swipeable
           key={idx}
           renderRightActions={(progress, dragX) => {
-            const translateX = dragX.interpolate({ inputRange: [-100, 0], outputRange: [0, 80], extrapolate: 'clamp' });
+            const translateX = dragX.interpolate({
+              inputRange: [-100, 0],
+              outputRange: [0, 80],
+              extrapolate: 'clamp',
+            });
             return (
-              <Animated.View style={[cardStyles.deleteAction, { transform: [{ translateX }] }]}> 
+              <Animated.View style={[cardStyles.deleteAction, { transform: [{ translateX }] }]}>
                 <Ionicons name="trash" size={22} color="#fff" />
               </Animated.View>
             );
@@ -229,69 +290,103 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
             onUpdate({ ...item, sets: next });
           }}
         >
-        <View style={cardStyles.setRow}>
-          <ThemedText style={[cardStyles.setIndex, { width: 40 }]}>
-            {idx + 1}
-          </ThemedText>
-          <ThemedText style={[cardStyles.previousText, { flex: 1 }]}>—</ThemedText>
-          {(() => {
-            let weightInput: any = null;
-            let repsInput: any = null;
-            return (
-              <>
-          <TextInput
-            ref={(r) => { weightInput = r; }}
-            style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
-            keyboardType="numeric"
-            value={set.weight}
-            onChangeText={(t) => handleChangeSet(idx, 'weight', t.replace(/[^0-9.]/g, ''))}
-            placeholder=""
-            onFocus={() => { onInputFocus && onInputFocus(() => weightInput?.focus()); }}
-          />
-          <TextInput
-            ref={(r) => { repsInput = r; }}
-            style={[cardStyles.numInput, { width: 70, borderColor: Colors[colorScheme ?? 'light'].icon, color: colors.text }]}
-            keyboardType="numeric"
-            value={set.reps}
-            onChangeText={(t) => handleChangeSet(idx, 'reps', t.replace(/[^0-9]/g, ''))}
-            placeholder=""
-            onFocus={() => { onInputFocus && onInputFocus(() => repsInput?.focus()); }}
-          />
-              </>
-            );
-          })()}
-          {(() => {
-            // Shake animation per-row
-            const shakeRef = (shakeMapRef.current[idx] ||= new Animated.Value(0));
-            const translateX = shakeRef.interpolate({ inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1], outputRange: [0, -6, 6, -4, 4, 0] });
-            const triggerShake = () => {
-              shakeRef.setValue(0);
-              Animated.timing(shakeRef, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-            };
-            return (
-              <Animated.View style={{ transform: [{ translateX }], width: 36 }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    const hasWeight = /\d/.test((set.weight ?? '').trim());
-                    const hasReps = /\d/.test((set.reps ?? '').trim());
-                    if (!set.completed && (!hasWeight || !hasReps)) {
-                      if (Platform.OS === 'android') {
-                        ToastAndroid.show('Enter weight and reps', ToastAndroid.SHORT);
-                      } else {
-                        triggerShake();
+          <View style={cardStyles.setRow}>
+            <ThemedText style={[cardStyles.setIndex, { width: 40 }]}>{idx + 1}</ThemedText>
+            <ThemedText style={[cardStyles.previousText, { flex: 1 }]}>—</ThemedText>
+            {(() => {
+              let weightInput: any = null;
+              let repsInput: any = null;
+              return (
+                <>
+                  <TextInput
+                    ref={(r) => {
+                      weightInput = r;
+                    }}
+                    style={[
+                      cardStyles.numInput,
+                      {
+                        width: 70,
+                        borderColor: Colors[colorScheme ?? 'light'].icon,
+                        color: colors.text,
+                      },
+                    ]}
+                    keyboardType="numeric"
+                    value={set.weight}
+                    onChangeText={(t) => handleChangeSet(idx, 'weight', t.replace(/[^0-9.]/g, ''))}
+                    placeholder=""
+                    onFocus={() => {
+                      onInputFocus && onInputFocus(() => weightInput?.focus());
+                    }}
+                  />
+                  <TextInput
+                    ref={(r) => {
+                      repsInput = r;
+                    }}
+                    style={[
+                      cardStyles.numInput,
+                      {
+                        width: 70,
+                        borderColor: Colors[colorScheme ?? 'light'].icon,
+                        color: colors.text,
+                      },
+                    ]}
+                    keyboardType="numeric"
+                    value={set.reps}
+                    onChangeText={(t) => handleChangeSet(idx, 'reps', t.replace(/[^0-9]/g, ''))}
+                    placeholder=""
+                    onFocus={() => {
+                      onInputFocus && onInputFocus(() => repsInput?.focus());
+                    }}
+                  />
+                </>
+              );
+            })()}
+            {(() => {
+              // Shake animation per-row
+              const shakeRef = (shakeMapRef.current[idx] ||= new Animated.Value(0));
+              const translateX = shakeRef.interpolate({
+                inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                outputRange: [0, -6, 6, -4, 4, 0],
+              });
+              const triggerShake = () => {
+                shakeRef.setValue(0);
+                Animated.timing(shakeRef, {
+                  toValue: 1,
+                  duration: 400,
+                  useNativeDriver: true,
+                }).start();
+              };
+              return (
+                <Animated.View style={{ transform: [{ translateX }], width: 36 }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const hasWeight = /\d/.test((set.weight ?? '').trim());
+                      const hasReps = /\d/.test((set.reps ?? '').trim());
+                      if (!set.completed && (!hasWeight || !hasReps)) {
+                        if (Platform.OS === 'android') {
+                          ToastAndroid.show('Enter weight and reps', ToastAndroid.SHORT);
+                        } else {
+                          triggerShake();
+                        }
+                        return;
                       }
-                      return;
-                    }
-                    handleChangeSet(idx, 'completed', !set.completed);
-                  }}
-                  style={[cardStyles.checkButton, set.completed && { backgroundColor: colors.tint }]}
-                >
-                  <Ionicons name="checkmark" size={18} color={set.completed ? '#fff' : Colors[colorScheme ?? 'light'].icon} />
-                </TouchableOpacity>
-              </Animated.View>
-            );
-          })()}
-        </View>
+                      handleChangeSet(idx, 'completed', !set.completed);
+                    }}
+                    style={[
+                      cardStyles.checkButton,
+                      set.completed && { backgroundColor: colors.tint },
+                    ]}
+                  >
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color={set.completed ? '#fff' : Colors[colorScheme ?? 'light'].icon}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })()}
+          </View>
         </Swipeable>
       ))}
 
@@ -300,7 +395,11 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
       </TouchableOpacity>
 
       {/* Replace Exercise Modal */}
-      <Modal visible={replaceVisible} animationType="slide" onRequestClose={() => setReplaceVisible(false)}>
+      <Modal
+        visible={replaceVisible}
+        animationType="slide"
+        onRequestClose={() => setReplaceVisible(false)}
+      >
         <CustomHeader
           title="Replace Exercise"
           showBackButton
@@ -336,26 +435,46 @@ export default function ExerciseCard({ item, onUpdate, onRemove, onInputFocus }:
                 keyExtractor={(it) => it.exerciseId}
                 renderItem={({ item: ex }) => {
                   const isSelected = replaceSelected === ex.exerciseId;
-                  const selectedBg = (colorScheme === 'dark') ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
+                  const selectedBg =
+                    colorScheme === 'dark' ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
                   const isLetter = ex.gifUrl?.startsWith('letter://');
-                  const letter = isLetter ? ex.gifUrl.replace('letter://', '').slice(0, 1) || 'X' : 'X';
+                  const letter = isLetter
+                    ? ex.gifUrl.replace('letter://', '').slice(0, 1) || 'X'
+                    : 'X';
                   return (
                     <TouchableOpacity
-                      onPress={() => setReplaceSelected((prev) => (prev === ex.exerciseId ? null : ex.exerciseId))}
-                      style={[cardStyles.rExerciseContainer, isSelected && { backgroundColor: selectedBg }]}
+                      onPress={() =>
+                        setReplaceSelected((prev) =>
+                          prev === ex.exerciseId ? null : ex.exerciseId,
+                        )
+                      }
+                      style={[
+                        cardStyles.rExerciseContainer,
+                        isSelected && { backgroundColor: selectedBg },
+                      ]}
                     >
                       <View style={cardStyles.rImageWrapper}>
                         {isSelected ? (
-                          <Ionicons name="checkmark" size={28} color={Colors[colorScheme ?? 'light'].tint} />
+                          <Ionicons
+                            name="checkmark"
+                            size={28}
+                            color={Colors[colorScheme ?? 'light'].tint}
+                          />
                         ) : isLetter ? (
-                          <View style={cardStyles.letterAvatar}><Text style={cardStyles.letterText}>{letter}</Text></View>
+                          <View style={cardStyles.letterAvatar}>
+                            <Text style={cardStyles.letterText}>{letter}</Text>
+                          </View>
                         ) : (
                           <Image source={{ uri: ex.gifUrl }} style={cardStyles.exerciseImage} />
                         )}
                       </View>
                       <View style={cardStyles.rExerciseDetails}>
-                        <ThemedText style={cardStyles.rExerciseName}>{toTitleCase(ex.name)}</ThemedText>
-                        <ThemedText style={cardStyles.rExerciseBodyPart}>{toTitleCase(ex.bodyParts?.join(', ') || '')}</ThemedText>
+                        <ThemedText style={cardStyles.rExerciseName}>
+                          {toTitleCase(ex.name)}
+                        </ThemedText>
+                        <ThemedText style={cardStyles.rExerciseBodyPart}>
+                          {toTitleCase(ex.bodyParts?.join(', ') || '')}
+                        </ThemedText>
                       </View>
                     </TouchableOpacity>
                   );
@@ -479,11 +598,16 @@ const cardStyles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   exerciseImage: { width: 50, height: 50, borderRadius: 8 },
-  letterAvatar: { width: 50, height: 50, borderRadius: 8, backgroundColor: '#0a7ea4', alignItems: 'center', justifyContent: 'center' },
+  letterAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: '#0a7ea4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   letterText: { color: '#fff', fontSize: 20, fontWeight: '700' },
   rExerciseDetails: { flex: 1 },
   rExerciseName: { fontSize: 16, fontWeight: '700' },
   rExerciseBodyPart: { fontSize: 14, color: '#888' },
 });
-
-

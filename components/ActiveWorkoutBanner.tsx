@@ -1,6 +1,9 @@
-import { usePathname, useRouter } from 'expo-router';
 import React from 'react';
+
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { usePathname, useRouter } from 'expo-router';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/Colors';
@@ -50,7 +53,9 @@ export default function ActiveWorkoutBanner() {
         style={[styles.banner, { backgroundColor: colors.tint }]}
         activeOpacity={0.85}
       >
-        <Text style={styles.bannerText}>Resume: {session.name} • {formatElapsed(session.startTime)}</Text>
+        <Text style={styles.bannerText}>
+          Resume: {session.name} • {formatElapsed(session.startTime)}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -82,6 +87,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-
-
-

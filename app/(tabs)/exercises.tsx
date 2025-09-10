@@ -1,20 +1,22 @@
-import { router } from 'expo-router';
 import React from 'react';
+
 import {
-    ActivityIndicator,
-    FlatList,
-    Keyboard,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+import { Image } from 'expo-image';
+import { router } from 'expo-router';
 
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
-import { Image } from 'expo-image';
 
 const toTitleCase = (str: string) => {
   if (!str) return '';
@@ -67,10 +69,13 @@ export default function ExercisesScreen() {
       initialQuery={searchQuery}
       onSearchQueryChange={setSearchQuery}
       menuOpenOnTap
-      menuItems={[{
-        title: 'Create Exercise',
-        onPress: () => router.push('/exercise/create'),
-      }]}>
+      menuItems={[
+        {
+          title: 'Create Exercise',
+          onPress: () => router.push('/exercise/create'),
+        },
+      ]}
+    >
       <ThemedView style={styles.container}>
         {loading ? (
           <ActivityIndicator size="large" />
@@ -90,7 +95,8 @@ export default function ExercisesScreen() {
                       params: { ...item },
                     });
                   }}
-                  style={styles.exerciseContainer}>
+                  style={styles.exerciseContainer}
+                >
                   <ExerciseAvatar exercise={item} />
                   <View style={styles.exerciseDetails}>
                     <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
