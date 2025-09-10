@@ -2,7 +2,7 @@ import React from 'react';
 
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -22,9 +22,21 @@ export default function HistoryScreen() {
   const colors = Colors[scheme ?? 'light'];
   const [items, setItems] = React.useState<CompletedWorkout[]>([]);
 
-  React.useEffect(() => {
+  const load = React.useCallback(() => {
     listWorkouts().then(setItems);
   }, []);
+
+  React.useEffect(() => {
+    load();
+  }, [load]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Refresh when the screen regains focus (e.g., after deleting an item)
+      load();
+      return () => {};
+    }, [load]),
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -82,6 +94,15 @@ export default function HistoryScreen() {
             ))}
           </TouchableOpacity>
         )}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyWrap}>
+            <Ionicons name="barbell-outline" size={48} color={colors.icon} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No workouts yet</Text>
+            <Text style={[styles.emptyText, { color: colors.icon }]}>
+              Start a workout to see it here.
+            </Text>
+          </View>
+        )}
       />
     </ThemedView>
   );
@@ -105,4 +126,7 @@ const styles = StyleSheet.create({
   },
   exerciseName: { fontWeight: '400' },
   bestSet: { marginLeft: 12, fontWeight: '400' },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: '50%' },
+  emptyTitle: { marginTop: 12, fontSize: 16, fontWeight: '700' },
+  emptyText: { marginTop: 6, textAlign: 'center' },
 });

@@ -94,3 +94,12 @@ export async function recordCompletedWorkout(
   await saveHistory(nextHistory);
   return { id, workoutNumber: nextHistory.length, prs };
 }
+
+export async function deleteWorkoutById(id: string): Promise<boolean> {
+  const history = await loadHistory();
+  const idx = history.findIndex((w) => w.id === id);
+  if (idx === -1) return false;
+  history.splice(idx, 1);
+  await saveHistory(history);
+  return true;
+}

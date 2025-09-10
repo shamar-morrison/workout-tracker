@@ -21,6 +21,18 @@ export default function HistoryDetailScreen() {
   const [workout, setWorkout] = React.useState<CompletedWorkout | null>(null);
   const [loading, setLoading] = React.useState(true);
 
+  const handleDelete = React.useCallback(async () => {
+    if (!workout?.id) return;
+    const { deleteWorkoutById } = await import('@/services/historyService');
+    await deleteWorkoutById(workout.id);
+    try {
+      const { ToastAndroid, Platform, Alert } = require('react-native');
+      if (Platform.OS === 'android') ToastAndroid.show('Workout deleted', ToastAndroid.SHORT);
+      else Alert.alert('Workout deleted');
+    } catch {}
+    router.back();
+  }, [router, workout?.id]);
+
   React.useEffect(() => {
     let cancelled = false;
     getWorkoutById(id as string).then((w) => {
@@ -55,7 +67,22 @@ export default function HistoryDetailScreen() {
 
   return (
     <ThemedView style={{ flex: 1 }}>
-      <CustomHeader title={workout.name} showBackButton onBackPress={() => router.back()}>
+      <CustomHeader
+        title={workout.name}
+        showBackButton
+        onBackPress={() => router.back()}
+        menuOpenOnTap
+        menuItems={[
+          {
+            title: 'Delete workout',
+            destructive: true,
+            confirmTitle: 'Delete workout?',
+            confirmMessage: 'This action cannot be undone.',
+            confirmConfirmText: 'Delete',
+            onPress: handleDelete,
+          },
+        ]}
+      >
         <View style={styles.container}>
           <View style={styles.topMeta}>
             <ThemedText style={styles.dateText}>

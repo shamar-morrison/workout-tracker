@@ -273,7 +273,8 @@ export default function ExerciseCard({
       {item.sets.map((set, idx) => (
         <Swipeable
           key={idx}
-          renderRightActions={(progress, dragX) => {
+          renderRightActions={(_progress, dragX) => {
+            1;
             const translateX = dragX.interpolate({
               inputRange: [-100, 0],
               outputRange: [0, 80],

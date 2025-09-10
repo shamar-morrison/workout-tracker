@@ -35,6 +35,10 @@ type MenuItem = {
   onPress: () => void;
   icon?: React.ReactElement;
   destructive?: boolean;
+  confirmTitle?: string;
+  confirmMessage?: string;
+  confirmCancelText?: string;
+  confirmConfirmText?: string;
 };
 
 type RightTextButton = {
@@ -234,12 +238,27 @@ export default function CustomHeader({
                 <SimpleMenu
                   visible={menuVisible}
                   onClose={() => setMenuVisible(false)}
-                  items={menuItems.map(({ title, onPress, destructive, icon }) => ({
-                    title,
-                    onPress,
-                    destructive,
-                    icon,
-                  }))}
+                  items={menuItems.map(
+                    ({
+                      title,
+                      onPress,
+                      destructive,
+                      icon,
+                      confirmTitle,
+                      confirmMessage,
+                      confirmCancelText,
+                      confirmConfirmText,
+                    }) => ({
+                      title,
+                      onPress,
+                      destructive,
+                      icon,
+                      confirmTitle,
+                      confirmMessage,
+                      confirmCancelText,
+                      confirmConfirmText,
+                    }),
+                  )}
                   anchorY={menuAnchorY}
                 />
               </TouchableOpacity>
