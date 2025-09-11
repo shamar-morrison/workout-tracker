@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+  ActivityIndicator,
   Alert,
   Platform,
   StyleSheet,
@@ -19,8 +20,9 @@ import CustomHeader from '@/components/CustomHeader';
 import MultiSelectModal from '@/components/MultiSelectModal';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Exercise, saveLocalExercise } from '@/services/exerciseService';
+import { Exercise, saveCustomExercise } from '@/services/exerciseService';
 
 const MUSCLE_OPTIONS = [
   'Chest',
@@ -52,16 +54,17 @@ export default function CreateExerciseScreen() {
   const [target, setTarget] = React.useState<string | null>(null);
   const [secondary, setSecondary] = React.useState<string[]>([]);
   const [iosToastVisible, setIosToastVisible] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const { user } = useAuth();
 
-  const saveDisabled = !name.trim();
+  const saveDisabled = !name.trim() || !user || loading;
 
   const handleSave = async () => {
     if (saveDisabled) return;
-    const id = `local_${Date.now()}`;
+    setLoading(true);
     const letter = name.trim().charAt(0).toUpperCase() || 'X';
     const placeholder = `letter://${letter}`;
-    const exercise: Exercise = {
-      exerciseId: id,
+    const exercise: Omit<Exercise, 'exerciseId'> = {
       name: name.trim(),
       gifUrl: placeholder,
       targetMuscles: target ? [target] : [],
@@ -71,7 +74,7 @@ export default function CreateExerciseScreen() {
       instructions: [],
     };
     try {
-      await saveLocalExercise(exercise);
+      await saveCustomExercise(exercise);
       if (Platform.OS === 'android') {
         ToastAndroid.show('Exercise saved', ToastAndroid.SHORT);
         router.back();
@@ -88,6 +91,8 @@ export default function CreateExerciseScreen() {
       } else {
         Alert.alert('Error', 'Failed to save exercise');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,8 +127,13 @@ export default function CreateExerciseScreen() {
         <TouchableOpacity
           style={[styles.fab, { backgroundColor: colors.tint, opacity: saveDisabled ? 0.6 : 1 }]}
           onPress={handleSave}
+          disabled={saveDisabled}
         >
-          <Ionicons name="checkmark" size={28} color={colorScheme === 'dark' ? '#fff' : '#fff'} />
+          {loading ? (
+            <ActivityIndicator color={colorScheme === 'dark' ? '#fff' : '#fff'} />
+          ) : (
+            <Ionicons name="checkmark" size={28} color={colorScheme === 'dark' ? '#fff' : '#fff'} />
+          )}
         </TouchableOpacity>
 
         {iosToastVisible ? (

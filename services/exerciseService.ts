@@ -1,5 +1,8 @@
+import { addDoc, collection, getDocs, query, serverTimestamp } from 'firebase/firestore';
+
 // Local storage helpers
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { auth, db } from './firebase';
 
 const BASE_URL = 'https://exercisedb-api-psi.vercel.app/api/v1';
 
@@ -20,23 +23,36 @@ export type ExerciseFilterOptions = {
   equipment?: string;
 };
 
-const LOCAL_KEY = 'custom_exercises_v1';
+export async function saveCustomExercise(ex: Omit<Exercise, 'exerciseId'>): Promise<string> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
 
-export async function loadLocalExercises(): Promise<Exercise[]> {
+  const customExercisesCol = collection(db, `users/${user.uid}/customExercises`);
+  const docRef = await addDoc(customExercisesCol, {
+    ...ex,
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export async function getCustomExercises(): Promise<Exercise[]> {
+  const user = auth.currentUser;
+  if (!user) return [];
+
   try {
-    const raw = await AsyncStorage.getItem(LOCAL_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as Exercise[]) : [];
+    const customExercisesCol = collection(db, `users/${user.uid}/customExercises`);
+    const q = query(customExercisesCol);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(
+      (d) =>
+        ({
+          ...d.data(),
+          exerciseId: d.id,
+        }) as Exercise,
+    );
   } catch {
     return [];
   }
-}
-
-export async function saveLocalExercise(ex: Exercise): Promise<void> {
-  const existing = await loadLocalExercises();
-  const updated = [ex, ...existing];
-  await AsyncStorage.setItem(LOCAL_KEY, JSON.stringify(updated));
 }
 
 export const fetchExercises = async (
@@ -45,7 +61,7 @@ export const fetchExercises = async (
   options: ExerciseFilterOptions = {},
 ): Promise<Exercise[]> => {
   const remote = await fetchRemoteExercises(limit, search, options).catch(() => [] as Exercise[]);
-  const local = await loadLocalExercises();
+  const local = await getCustomExercises();
 
   const matchesFilter = (e: Exercise) => {
     if (
