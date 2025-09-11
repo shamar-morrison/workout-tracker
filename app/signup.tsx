@@ -31,6 +31,7 @@ export default function SignUpScreen() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -46,12 +47,16 @@ export default function SignUpScreen() {
   }, []);
 
   function validateFields() {
-    if (!email.trim() || !password.trim() || !displayName.trim()) {
+    if (!email.trim() || !password.trim() || !displayName.trim() || !confirmPassword.trim()) {
       setError('All fields are required.');
       return false;
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
       return false;
     }
     return true;
@@ -124,6 +129,25 @@ export default function SignUpScreen() {
                   value={password}
                   onChangeText={setPassword}
                   style={styles.input}
+                  returnKeyType="next"
+                />
+                <TouchableOpacity
+                  onPress={() => setPasswordVisible((prev) => !prev)}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons name={isPasswordVisible ? 'eye-off' : 'eye'} size={22} color="#666" />
+                </TouchableOpacity>
+              </View>
+              <View style={{ height: 12 }} />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  autoCapitalize="none"
+                  secureTextEntry={!isPasswordVisible}
+                  placeholder="Confirm Password"
+                  placeholderTextColor="#999"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  style={styles.input}
                   returnKeyType="go"
                   onSubmitEditing={handleSignUp}
                 />
@@ -168,7 +192,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    gap: 8,
+    gap: 1,
   },
   passwordContainer: {
     position: 'relative',
