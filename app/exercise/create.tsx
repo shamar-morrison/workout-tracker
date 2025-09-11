@@ -24,10 +24,16 @@ import { Exercise, saveLocalExercise } from '@/services/exerciseService';
 
 const MUSCLE_OPTIONS = [
   'Chest',
-  'Back',
   'Legs',
   'Arms',
+  'Biceps',
+  'Triceps',
+  'Forearms',
   'Shoulders',
+  'Lats',
+  'Lower back',
+  'Upper back',
+  'Middle back',
   'Core',
   'Glutes',
   'Calves',
