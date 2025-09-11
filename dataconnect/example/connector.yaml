@@ -1,0 +1,452 @@
+connectorId: example
+generate:
+  javascriptSdk:
+    - outputDir: ../../../../../Downloads/default_25_08_29_19:54:15/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Downloads/default_25_08_29_19:54:15
+      react: true
+      angular: false
+    - outputDir: ../../src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../..
+      react: true
+      angular: false
+    - outputDir: ../../../storage_management_solution-main/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../storage_management_solution-main
+      react: true
+      angular: false
+    - outputDir: ../../../portfolio-nextjs/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../portfolio-nextjs
+      react: true
+      angular: false
+    - outputDir: ../../../media_tracker/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../media_tracker
+      react: true
+      angular: false
+    - outputDir: ../../../lemon-squeezy-test/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../lemon-squeezy-test
+      react: true
+      angular: false
+    - outputDir: ../../../horizon-movie-downloader-v2/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../horizon-movie-downloader-v2
+      react: true
+      angular: false
+    - outputDir: ../../../flex-plan/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../flex-plan
+      react: true
+      angular: false
+    - outputDir: ../../../fitness-tracker/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../fitness-tracker
+      react: true
+      angular: false
+    - outputDir: ../../../bingebox/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../bingebox
+      react: true
+      angular: false
+    - outputDir: ../../../../edufocal-projects/amigo-teacher/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../edufocal-projects/amigo-teacher
+      react: true
+      angular: false
+    - outputDir: ../../../../edufocal-projects/bubble-bee-quiz/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../edufocal-projects/bubble-bee-quiz
+      react: true
+      angular: false
+    - outputDir: ../../../../../Library/pnpm/global/5/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/pnpm/global/5
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.8/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.8
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.6/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.6
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.7/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.7
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.4/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.4
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.5/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.5
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.2/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.2
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.0/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.0
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/typescript/5.3/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/typescript/5.3
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/pnpm/store/v3/tmp/dlx-90844/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/pnpm/store/v3/tmp/dlx-90844
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/pnpm/store/v3/tmp/dlx-3605/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/pnpm/store/v3/tmp/dlx-3605
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/pnpm/dlx/xi2ridbu3kef5vf7q6ypl4n2ha/19067c2871e-115e9/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/pnpm/dlx/xi2ridbu3kef5vf7q6ypl4n2ha/19067c2871e-115e9
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_zstd/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_zstd
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_voice/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_voice
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_utils/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_utils
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_spellcheck/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_spellcheck
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_rpc/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_rpc
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_notifications/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_notifications
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_modules/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_modules
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_krisp/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_krisp
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_intents/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_intents
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_erlpack/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_erlpack
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_dispatch/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_dispatch
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_desktop_core/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_desktop_core
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_game_utils/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_game_utils
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_cloudsync/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Application
+        Support/discord/0.0.360/modules/discord_cloudsync
+      react: false
+      angular: false
+    - outputDir: ../../../../../sdk/go1.23.3/src/cmd/vendor/golang.org/x/telemetry/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../sdk/go1.23.3/src/cmd/vendor/golang.org/x/telemetry
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/18.3.7/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/18.3.7
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/18.3.5/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/18.3.5
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/18.2.25/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/18.2.25
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/lodash/4.17.13/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/lodash/4.17.13
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/19.0.6/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Caches/JetBrains/WebStorm2024.2/javascript/typings/react-dom/19.0.6
+      react: false
+      angular: false
+    - outputDir: ../../../../../Library/Android/sdk/ndk/26.1.10909125/sources/third_party/shaderc/third_party/spirv-tools/source/wasm/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Library/Android/sdk/ndk/26.1.10909125/sources/third_party/shaderc/third_party/spirv-tools/source/wasm
+      react: false
+      angular: false
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_tools/test/data/vscode/application/resources/app/src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../../../../../Documents/flutter/packages/flutter_tools/test/data/vscode/application/resources/app
+      react: false
+      angular: false
+  dartSdk:
+    - outputDir: ../../../../../Documents/flutter/packages/integration_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_localizations/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_goldens/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_driver/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/texture/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/splash/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/platform_view/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/platform_channel_swift/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/platform_channel/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/layers/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/image_list/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/hello_world/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/flutter_view/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/examples/api/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/fuchsia_remote_debug_protocol/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_web_plugins/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_tools/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/tracing_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/snippets/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/tools/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/missing_dependency_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/forbidden_from_release_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/manual_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/devicelab/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/customer_testing/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/bots/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/automated_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/a11y_assessments/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/integration_test/integration_test_macos/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/integration_test/example/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter/test_private/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/tools/vitool/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/tools/native_driver/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/tools/gen_keycodes/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/tools/gen_defaults/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/web_e2e_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/wide_gamut_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/web_compile_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/windows_startup_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/web/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/spell_check/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/ui/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/release_smoke_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/platform_interaction/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/non_nullable/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/new_gallery/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/native_driver_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/link_hook/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/ios_platform_view_tests/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/ios_app_with_extensions/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/hybrid_android_views/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/flutter_gallery/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/external_textures/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/flavors/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/deferred_components_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/android_views/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/channels/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/android_verified_input/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/android_semantics_testing/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/android_embedding_v2_smoke_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/gradle_deprecated_settings/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/abstract_method_smoke_test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/docs/renderers/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/docs/platform_integration/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/conductor/core/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/platform_views_layout_hybrid_composition/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/platform_views_layout/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/platform_channels_benchmarks/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/microbenchmarks/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/macrobenchmarks/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/complex_layout/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter/test_private/test/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/bin/cache/pkg/sky_engine/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/bin/cache/pkg/flutter_gpu/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/ios_add2app_life_cycle/flutterapp/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/test_apps/stocks/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/multiple_flutters/module/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/packages/flutter_test/test/test_config/project_root/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/bin/cache/dart-sdk/pkg/_macros/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/bin/cache/dart-sdk/lib/_internal/sdk_library_metadata/lib/dataconnect_generated
+      package: dataconnect_generated
+    - outputDir: ../../../../../Documents/flutter/bin/cache/dart-sdk/lib/_internal/js_runtime/lib/dataconnect_generated
+      package: dataconnect_generated
+  kotlinSdk:
+    - outputDir: ../../android/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../media_tracker/android/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/module_host_with_custom_build_v2_embedding/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/android_module_host_with_custom_build_v2_embedding/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/pure_android_host_apps/host_app_kotlin_gradle_dsl/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/pure_android_host_apps/android_host_app_v2_embedding/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/pure_android_host_apps/android_custom_host_app/SampleApp/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+    - outputDir: ../../../../../Documents/flutter/dev/benchmarks/multiple_flutters/android/app/src/main/kotlin
+      package: com.google.firebase.dataconnect.generated
+  swiftSdk:
+    - outputDir: ../../FirebaseDataConnectGenerated
+      package: DataConnectGenerated
+    - outputDir: ../../../media_tracker/FirebaseDataConnectGenerated
+      package: DataConnectGenerated
+    - outputDir: ../../../../../Documents/flutter/dev/integration_tests/FirebaseDataConnectGenerated
+      package: DataConnectGenerated
