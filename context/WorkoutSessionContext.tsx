@@ -15,6 +15,7 @@ import {
 } from '@/services/notificationService';
 
 export type WorkoutSet = {
+  id?: string;
   weight: string;
   reps: string;
   completed: boolean;

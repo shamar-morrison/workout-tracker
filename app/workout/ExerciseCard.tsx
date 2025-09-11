@@ -105,8 +105,24 @@ export default function ExerciseCard({
   };
 
   const addSet = () => {
-    onUpdate({ ...item, sets: [...item.sets, { weight: '', reps: '', completed: false }] });
+    const newSetId = `set_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    onUpdate({
+      ...item,
+      sets: [...item.sets, { id: newSetId, weight: '', reps: '', completed: false }],
+    });
   };
+
+  // Ensure all existing sets have stable ids for reliable Swipeable behavior
+  React.useEffect(() => {
+    if (!item.sets.some((s) => !s.id)) return;
+    const withIds = item.sets.map((s) =>
+      s.id ? s : { ...s, id: `set_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` },
+    );
+    onUpdate({ ...item, sets: withIds });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.sets.length]);
+
+  const swipeRefs = React.useRef<Record<string, any>>({});
 
   const hasData = React.useMemo(() => {
     return item.sets.some((s) => {
@@ -272,9 +288,12 @@ export default function ExerciseCard({
 
       {item.sets.map((set, idx) => (
         <Swipeable
-          key={idx}
+          ref={(ref) => {
+            const k = set.id ?? String(idx);
+            if (ref) swipeRefs.current[k] = ref;
+          }}
+          key={(set.id ?? String(idx)) + '_' + (set.weight ?? '') + '_' + (set.reps ?? '')}
           renderRightActions={(_progress, dragX) => {
-            1;
             const translateX = dragX.interpolate({
               inputRange: [-100, 0],
               outputRange: [0, 80],
@@ -287,8 +306,15 @@ export default function ExerciseCard({
             );
           }}
           onSwipeableRightOpen={() => {
-            const next = item.sets.filter((_, i) => i !== idx);
-            onUpdate({ ...item, sets: next });
+            const targetKey = set.id ?? String(idx);
+            try {
+              swipeRefs.current[targetKey]?.close();
+            } catch {}
+            const next = set.id
+              ? item.sets.filter((s) => s.id !== set.id)
+              : item.sets.filter((_, i) => i !== idx);
+            // Force fresh objects to reset any Swipeable internal state
+            onUpdate({ ...item, sets: next.map((s) => ({ ...s })) });
           }}
         >
           <View style={cardStyles.setRow}>
