@@ -19,7 +19,7 @@ export default function ProfileScreen() {
     <ThemedView style={styles.container}>
       <View style={{ padding: 24, gap: 12 }}>
         <ThemedText type="title">Profile</ThemedText>
-        {user && <ThemedText>Signed in as {user.email ?? user.displayName ?? user.uid}</ThemedText>}
+        {user && <ThemedText>Signed in as {user.displayName ?? user.email ?? user.uid}</ThemedText>}
         <ThemedText onPress={handleSignOut} style={styles.signOut}>
           Sign out
         </ThemedText>
