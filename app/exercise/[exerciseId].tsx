@@ -1,10 +1,13 @@
+import React from 'react';
+
+import { ScrollView, StyleSheet, View } from 'react-native';
+
+import { Image } from 'expo-image';
+import { Stack, useLocalSearchParams } from 'expo-router';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Exercise } from '@/services/exerciseService';
-import { Image } from 'expo-image';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
 
 const toTitleCase = (str: string) => {
   if (!str) return '';
@@ -26,7 +29,10 @@ export default function ExerciseDetailScreen() {
   };
 
   const isCustom = React.useMemo(() => {
-    return (item.exerciseId?.startsWith('local_') ?? false) || (item.gifUrl?.startsWith('letter://') ?? false);
+    return (
+      (item.exerciseId?.startsWith('local_') ?? false) ||
+      (item.gifUrl?.startsWith('letter://') ?? false)
+    );
   }, [item.exerciseId, item.gifUrl]);
 
   const formattedInstructions = React.useMemo(() => {

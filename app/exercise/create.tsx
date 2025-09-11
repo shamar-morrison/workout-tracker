@@ -1,15 +1,45 @@
+import React from 'react';
+
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { router } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
+
 import CustomHeader from '@/components/CustomHeader';
 import MultiSelectModal from '@/components/MultiSelectModal';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, saveLocalExercise } from '@/services/exerciseService';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React from 'react';
-import { Alert, Platform, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
-const MUSCLE_OPTIONS = ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core', 'Glutes', 'Calves', 'Full body', 'Other'];
+const MUSCLE_OPTIONS = [
+  'Chest',
+  'Legs',
+  'Arms',
+  'Biceps',
+  'Triceps',
+  'Forearms',
+  'Shoulders',
+  'Lats',
+  'Lower back',
+  'Upper back',
+  'Middle back',
+  'Core',
+  'Glutes',
+  'Calves',
+  'Full body',
+  'Other',
+];
 
 export default function CreateExerciseScreen() {
   const colorScheme = useColorScheme();
@@ -70,7 +100,10 @@ export default function CreateExerciseScreen() {
             placeholderTextColor={colors.icon}
             value={name}
             onChangeText={setName}
-            style={[styles.input, { color: colors.text, borderColor: colors.icon, backgroundColor: colors.background }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.icon, backgroundColor: colors.background },
+            ]}
           />
         </View>
 
@@ -94,7 +127,7 @@ export default function CreateExerciseScreen() {
         </TouchableOpacity>
 
         {iosToastVisible ? (
-          <View style={styles.toast}> 
+          <View style={styles.toast}>
             <Text style={styles.toastText}>Exercise saved</Text>
           </View>
         ) : null}

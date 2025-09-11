@@ -1,21 +1,26 @@
-import { ExpoContextMenu } from '@appandflow/expo-context-menu';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
+
 import {
-    Keyboard,
-    Platform,
-    Pressable,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Keyboard,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+import { useFocusEffect, useRouter } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
+
+import { ExpoContextMenu } from '@appandflow/expo-context-menu';
 
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+
 import SimpleMenu from './SimpleMenu';
 
 type IconProps = {
@@ -30,6 +35,10 @@ type MenuItem = {
   onPress: () => void;
   icon?: React.ReactElement;
   destructive?: boolean;
+  confirmTitle?: string;
+  confirmMessage?: string;
+  confirmCancelText?: string;
+  confirmConfirmText?: string;
 };
 
 type RightTextButton = {
@@ -109,7 +118,7 @@ export default function CustomHeader({
           setMenuVisible(false);
         }
       };
-    }, [resetOnBlurWhenEmpty, query, onSearchToggle])
+    }, [resetOnBlurWhenEmpty, query, onSearchToggle]),
   );
 
   React.useEffect(() => {
@@ -150,7 +159,8 @@ export default function CustomHeader({
     combinedRightIcons.push(...rightIcons);
   }
 
-  const shouldDeactivateOnOutsidePress = enableSearch && isSearchActive && !isKeyboardVisible.current && query === '';
+  const shouldDeactivateOnOutsidePress =
+    enableSearch && isSearchActive && !isKeyboardVisible.current && query === '';
 
   return (
     <SafeAreaView style={[styles.headerContainer, { backgroundColor: colors.background }]}>
@@ -228,13 +238,38 @@ export default function CustomHeader({
                 <SimpleMenu
                   visible={menuVisible}
                   onClose={() => setMenuVisible(false)}
-                  items={menuItems.map(({ title, onPress, destructive, icon }) => ({ title, onPress, destructive, icon }))}
+                  items={menuItems.map(
+                    ({
+                      title,
+                      onPress,
+                      destructive,
+                      icon,
+                      confirmTitle,
+                      confirmMessage,
+                      confirmCancelText,
+                      confirmConfirmText,
+                    }) => ({
+                      title,
+                      onPress,
+                      destructive,
+                      icon,
+                      confirmTitle,
+                      confirmMessage,
+                      confirmCancelText,
+                      confirmConfirmText,
+                    }),
+                  )}
                   anchorY={menuAnchorY}
                 />
               </TouchableOpacity>
             ) : (
               <ExpoContextMenu
-                menuItems={menuItems.map((m) => ({ title: m.title, onPress: m.onPress, icon: m.icon, destructive: m.destructive }))}
+                menuItems={menuItems.map((m) => ({
+                  title: m.title,
+                  onPress: m.onPress,
+                  icon: m.icon,
+                  destructive: m.destructive,
+                }))}
               >
                 <View style={styles.icon}>
                   <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
@@ -256,7 +291,8 @@ export default function CustomHeader({
               setIsSearchActive(false);
               if (onSearchToggle) onSearchToggle(false);
             }
-          }}>
+          }}
+        >
           <View style={{ flex: 1 }}>{children}</View>
         </Pressable>
       ) : null}

@@ -1,6 +1,8 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
+
 import { Platform } from 'react-native';
+
+import { Tabs } from 'expo-router';
 
 import ActiveWorkoutTabBar from '@/components/ActiveWorkoutTabBar';
 import { HapticTab } from '@/components/HapticTab';
@@ -26,13 +28,16 @@ export default function TabLayout() {
           },
           default: {},
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
           headerShown: true,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.crop.circle" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -40,7 +45,9 @@ export default function TabLayout() {
         options={{
           title: 'History',
           headerShown: true,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock.arrow.circlepath" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="clock.arrow.circlepath" color={color} />
+          ),
         }}
       />
       <Tabs.Screen

@@ -1,33 +1,39 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { router, Stack } from 'expo-router';
 import React from 'react';
+
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    InteractionManager,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  InteractionManager,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+import { Image } from 'expo-image';
+import { Stack, router } from 'expo-router';
+
+import { Ionicons } from '@expo/vector-icons';
+
+import DraggableFlatList from 'react-native-draggable-flatlist';
 
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import { useWorkoutSession, WorkoutExercise } from '@/context/WorkoutSessionContext';
+import { WorkoutExercise, useWorkoutSession } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Exercise, fetchExercises } from '@/services/exerciseService';
 import { recordCompletedWorkout } from '@/services/historyService';
+
 import ExerciseCardItem from './ExerciseCard';
 
 export default function CustomWorkoutScreen() {
@@ -46,6 +52,27 @@ export default function CustomWorkoutScreen() {
   // UI state for modals/pickers
   const [editSheetVisible, setEditSheetVisible] = React.useState(false);
   const [pickerVisible, setPickerVisible] = React.useState(false);
+  const [reorderMode, setReorderMode] = React.useState(false);
+  const dragMapRef = React.useRef<Record<string, (() => void) | undefined>>({});
+  const pendingDragIdRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (!reorderMode) return;
+    const id = pendingDragIdRef.current;
+    if (!id) return;
+    let attempts = 0;
+    const tryStart = () => {
+      const start = dragMapRef.current[id];
+      if (start) {
+        pendingDragIdRef.current = null;
+        setTimeout(() => start(), 10);
+      } else if (attempts < 20) {
+        attempts += 1;
+        setTimeout(tryStart, 30);
+      }
+    };
+    tryStart();
+  }, [reorderMode, session.exercises]);
 
   // Picker-related state
   const [search, setSearch] = React.useState('');
@@ -57,11 +84,20 @@ export default function CustomWorkoutScreen() {
   // Track keyboard height to pad list so last inputs stay visible
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
   React.useEffect(() => {
-    const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
-      setKeyboardHeight(e.endCoordinates?.height ?? 0);
-    });
-    const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardHeight(0));
-    return () => { showSub.remove(); hideSub.remove(); };
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates?.height ?? 0);
+      },
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0),
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   // Ensure a session exists and keep timer ticking from session.startTime
@@ -104,7 +140,10 @@ export default function CustomWorkoutScreen() {
 
   const toTitleCase = React.useCallback((str: string) => {
     if (!str) return '';
-    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    return str.replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+    );
   }, []);
 
   const formattedTime = React.useMemo(() => {
@@ -143,16 +182,20 @@ export default function CustomWorkoutScreen() {
       return;
     }
 
-    const isValid = (s: { weight: string; reps: string }) => /\d/.test((s.weight ?? '').trim()) && /\d/.test((s.reps ?? '').trim());
+    const isValid = (s: { weight: string; reps: string }) =>
+      /\d/.test((s.weight ?? '').trim()) && /\d/.test((s.reps ?? '').trim());
 
-    const completedSets = session.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.completed).length, 0);
+    const completedSets = session.exercises.reduce(
+      (acc, ex) => acc + ex.sets.filter((s) => s.completed).length,
+      0,
+    );
     const validNotCompleted = session.exercises.reduce(
       (acc, ex) => acc + ex.sets.filter((s) => !s.completed && isValid(s)).length,
-      0
+      0,
     );
     const invalidSets = session.exercises.reduce(
       (acc, ex) => acc + ex.sets.filter((s) => !s.completed && !isValid(s)).length,
-      0
+      0,
     );
 
     // No completed or valid sets at all
@@ -176,31 +219,35 @@ export default function CustomWorkoutScreen() {
         .filter((ex) => ex.sets.length > 0);
 
       // Build summary metrics
-      const durationSec = Math.max(0, Math.floor(((Date.now()) - (session.startTime ?? Date.now())) / 1000));
+      const durationSec = Math.max(
+        0,
+        Math.floor((Date.now() - (session.startTime ?? Date.now())) / 1000),
+      );
       let totalVolume = 0;
-      const exercisesSummary = cleaned.map((ex) => {
-        let best: { weight: number; reps: number } | null = null;
-        let setCount = 0;
-        for (const s of ex.sets) {
-          const weight = parseFloat(s.weight || '0');
-          const reps = parseInt(s.reps || '0', 10);
-          if (weight > 0 && reps > 0) {
-            totalVolume += weight * reps;
-            setCount += 1;
-            if (!best || weight > best.weight || (weight === best.weight && reps > best.reps)) {
-              best = { weight, reps };
+      const exercisesSummary = cleaned
+        .map((ex) => {
+          let best: { weight: number; reps: number } | null = null;
+          let setCount = 0;
+          for (const s of ex.sets) {
+            const weight = parseFloat(s.weight || '0');
+            const reps = parseInt(s.reps || '0', 10);
+            if (weight > 0 && reps > 0) {
+              totalVolume += weight * reps;
+              setCount += 1;
+              if (!best || weight > best.weight || (weight === best.weight && reps > best.reps)) {
+                best = { weight, reps };
+              }
             }
           }
-        }
-        return {
-          exerciseId: ex.exercise.exerciseId,
-          name: ex.exercise.name,
-          setCount,
-          bestSet: best,
-        };
-      })
-      // Save only exercises with at least one valid/completed set
-      .filter((ex) => ex.setCount > 0);
+          return {
+            exerciseId: ex.exercise.exerciseId,
+            name: ex.exercise.name,
+            setCount,
+            bestSet: best,
+          };
+        })
+        // Save only exercises with at least one valid/completed set
+        .filter((ex) => ex.setCount > 0);
 
       const { id, workoutNumber, prs } = await recordCompletedWorkout({
         name: session.name,
@@ -234,11 +281,13 @@ export default function CustomWorkoutScreen() {
   const listRef = React.useRef<FlatList<any> | null>(null);
   // expose ref for child callback usage without prop-drilling through wrappers
   // (kept simple; not meant for general global usage)
-  ;(global as any).__customWorkoutListRef = null;
+  (global as any).__customWorkoutListRef = null;
 
   React.useEffect(() => {
     (global as any).__customWorkoutListRef = listRef.current;
-    return () => { (global as any).__customWorkoutListRef = null; };
+    return () => {
+      (global as any).__customWorkoutListRef = null;
+    };
   }, []);
 
   const pendingRefocus = React.useRef<(() => void) | null>(null);
@@ -290,7 +339,12 @@ export default function CustomWorkoutScreen() {
       >
         <ThemedView style={styles.inner}>
           <View style={styles.timerRow}>
-            <Ionicons name="time-outline" size={18} color={colors.text} style={{ marginRight: 8 }} />
+            <Ionicons
+              name="time-outline"
+              size={18}
+              color={colors.text}
+              style={{ marginRight: 8 }}
+            />
             <ThemedText style={styles.timerText}>{formattedTime}</ThemedText>
           </View>
 
@@ -306,75 +360,207 @@ export default function CustomWorkoutScreen() {
             multiline
           />
 
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <FlatList
-              ref={(r) => { listRef.current = r as any; (global as any).__customWorkoutListRef = r; }}
-              data={session.exercises}
-              keyExtractor={(item) => item.id}
-              keyboardDismissMode="none"
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingBottom: keyboardHeight + 24 }}
-              onMomentumScrollEnd={flushRefocus}
-              onScrollEndDrag={flushRefocus}
-              renderItem={({ item, index }) => (
-                <ExerciseCardItem
-                  item={item}
-                  onInputFocus={(refocus) => {
-                    const scrollRef = listRef.current as any;
-                    if (!scrollRef || !scrollRef.scrollToIndex) return;
-                    try {
-                      // For the last item, scroll it to the top so inputs have max space above keyboard
-                      const isLast = index === session.exercises.length - 1;
-                      scrollRef.scrollToIndex({ index, viewPosition: isLast ? 0 : 0.1, animated: true });
-                      if (refocus) scheduleRefocus(refocus);
-                    } catch {
-                      // fallback in case measurement isn't ready
-                      const current = scrollRef._scrollMetrics?.offset || 0;
-                      scrollRef.scrollToOffset?.({ offset: current + 120, animated: true });
-                      if (refocus) scheduleRefocus(refocus);
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            {reorderMode ? (
+              <DraggableFlatList
+                contentContainerStyle={{ padding: 8, paddingBottom: 24 }}
+                data={session.exercises}
+                keyExtractor={(item) => item.id}
+                activationDistance={12}
+                onDragEnd={({ data }) => update({ exercises: data })}
+                onLayout={() => {
+                  const id = pendingDragIdRef.current;
+                  if (id) {
+                    const startDrag = dragMapRef.current[id];
+                    pendingDragIdRef.current = null;
+                    if (startDrag) {
+                      // slight delay to ensure items are mounted
+                      setTimeout(() => startDrag(), 30);
                     }
-                  }}
-                  onUpdate={(updated) => {
-                    const nextExercises = session.exercises.map((ex) => (ex.id === updated.id ? updated : ex));
-                    update({ exercises: nextExercises });
-                  }}
-                  onRemove={() => {
-                    const nextExercises = session.exercises.filter((ex) => ex.id !== item.id);
-                    update({ exercises: nextExercises });
-                  }}
-                />
-              )}
-              ListFooterComponent={() => (
-                <View style={{ paddingVertical: 8 }}>
+                  }
+                }}
+                ListHeaderComponent={() => (
+                  <View style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
+                    <ThemedText style={{ opacity: 0.8 }}>
+                      Press and hold to drag and reorder exercises.
+                    </ThemedText>
+                  </View>
+                )}
+                renderItem={({ item, drag, isActive, getIndex }) => (
                   <TouchableOpacity
-                    style={styles.addExercise}
-                    onPress={() => setPickerVisible(true)}
-                    accessibilityRole="button"
-                    activeOpacity={0.8}
+                    onLayout={() => {
+                      dragMapRef.current[item.id] = drag;
+                      if (pendingDragIdRef.current === item.id) {
+                        // Immediately start dragging for the item that triggered reorder
+                        setTimeout(() => drag(), 10);
+                      }
+                    }}
+                    onLongPress={drag}
+                    activeOpacity={0.9}
+                    style={{
+                      minHeight: 56,
+                      paddingVertical: 12,
+                      paddingHorizontal: 14,
+                      borderRadius: 12,
+                      borderWidth: StyleSheet.hairlineWidth,
+                      borderColor: colors.icon,
+                      marginBottom: 10,
+                      backgroundColor: isActive
+                        ? colorScheme === 'dark'
+                          ? 'rgba(10,126,164,0.25)'
+                          : 'rgba(10,126,164,0.10)'
+                        : colorScheme === 'dark'
+                          ? 'rgba(255,255,255,0.02)'
+                          : '#fff',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
                   >
-                    <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <View
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 14,
+                          backgroundColor: colors.tint,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text style={{ color: '#fff', fontWeight: '700' }}>
+                          {(getIndex?.() ?? 0) + 1}
+                        </Text>
+                      </View>
+                      <ThemedText
+                        style={{ fontWeight: '700', maxWidth: '74%' }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {toTitleCase(item.exercise.name)}
+                      </ThemedText>
+                    </View>
+                    <Ionicons name="reorder-three-outline" size={22} color={colors.icon} />
                   </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.cancelWorkout}
-                    onPress={handleCancel}
-                    accessibilityRole="button"
-                    activeOpacity={0.8}
+                )}
+                ListFooterComponent={() => (
+                  <View style={{ paddingVertical: 8 }}>
+                    <TouchableOpacity
+                      style={[styles.addExercise, { backgroundColor: '#607D8B' }]}
+                      onPress={() => setReorderMode(false)}
+                      accessibilityRole="button"
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.addExerciseText}>DONE REORDERING</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            ) : (
+              <FlatList
+                ref={(r) => {
+                  listRef.current = r as any;
+                  (global as any).__customWorkoutListRef = r;
+                }}
+                data={session.exercises}
+                keyExtractor={(item) => item.id}
+                keyboardDismissMode="none"
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: keyboardHeight + 24 }}
+                onMomentumScrollEnd={flushRefocus}
+                onScrollEndDrag={flushRefocus}
+                renderItem={({ item, index }) => (
+                  <Pressable
+                    onLongPress={() => {
+                      pendingDragIdRef.current = item.id;
+                      setReorderMode(true);
+                    }}
+                    delayLongPress={280}
                   >
-                    <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
-                  </TouchableOpacity>
+                    <ExerciseCardItem
+                      item={item}
+                      onInputFocus={(refocus) => {
+                        const scrollRef = listRef.current as any;
+                        if (!scrollRef || !scrollRef.scrollToIndex) return;
+                        try {
+                          const isLast = index === session.exercises.length - 1;
+                          scrollRef.scrollToIndex({
+                            index,
+                            viewPosition: isLast ? 0 : 0.1,
+                            animated: true,
+                          });
+                          if (refocus) scheduleRefocus(refocus);
+                        } catch {
+                          const current = scrollRef._scrollMetrics?.offset || 0;
+                          scrollRef.scrollToOffset?.({ offset: current + 120, animated: true });
+                          if (refocus) scheduleRefocus(refocus);
+                        }
+                      }}
+                      onUpdate={(updated) => {
+                        const nextExercises = session.exercises.map((ex) =>
+                          ex.id === updated.id ? updated : ex,
+                        );
+                        update({ exercises: nextExercises });
+                      }}
+                      onRemove={() => {
+                        const nextExercises = session.exercises.filter((ex) => ex.id !== item.id);
+                        update({ exercises: nextExercises });
+                      }}
+                    />
+                  </Pressable>
+                )}
+                ListFooterComponent={() => (
+                  <View style={{ paddingVertical: 8 }}>
+                    <TouchableOpacity
+                      style={styles.addExercise}
+                      onPress={() => setPickerVisible(true)}
+                      accessibilityRole="button"
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.addExerciseText}>ADD EXERCISE</Text>
+                    </TouchableOpacity>
 
-                </View>
-              )}
-            />
+                    <TouchableOpacity
+                      style={styles.cancelWorkout}
+                      onPress={handleCancel}
+                      accessibilityRole="button"
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.cancelWorkoutText}>CANCEL WORKOUT</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.addExercise, { backgroundColor: '#607D8B' }]}
+                      onLongPress={() => setReorderMode(true)}
+                      onPress={() => setReorderMode(true)}
+                      accessibilityRole="button"
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.addExerciseText}>REORDER EXERCISES</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            )}
           </KeyboardAvoidingView>
         </ThemedView>
       </CustomHeader>
 
       {/* Edit details sheet */}
-      <Modal visible={editSheetVisible} transparent animationType="slide" onRequestClose={() => setEditSheetVisible(false)}>
+      <Modal
+        visible={editSheetVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditSheetVisible(false)}
+      >
         <Pressable style={styles.sheetBackdrop} onPress={() => setEditSheetVisible(false)}>
-          <Pressable style={[styles.sheet, { backgroundColor: colors.background }]} onPress={(e) => e.stopPropagation()}>
+          <Pressable
+            style={[styles.sheet, { backgroundColor: colors.background }]}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={[styles.sheetTitle, { color: colors.text }]}>Edit details</Text>
             <Text style={[styles.label, { color: colors.text }]}>Name</Text>
             <TextInput
@@ -411,7 +597,10 @@ export default function CustomWorkoutScreen() {
             >
               <Text style={styles.sheetButtonText}>Reset timer</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.sheetButton, { backgroundColor: '#0a7ea4' }]} onPress={() => setEditSheetVisible(false)}>
+            <TouchableOpacity
+              style={[styles.sheetButton, { backgroundColor: '#0a7ea4' }]}
+              onPress={() => setEditSheetVisible(false)}
+            >
               <Text style={styles.sheetButtonText}>Done</Text>
             </TouchableOpacity>
           </Pressable>
@@ -419,7 +608,11 @@ export default function CustomWorkoutScreen() {
       </Modal>
 
       {/* Exercise picker - full screen with search, gifs, multi-select */}
-      <Modal visible={pickerVisible} animationType="slide" onRequestClose={() => setPickerVisible(false)}>
+      <Modal
+        visible={pickerVisible}
+        animationType="slide"
+        onRequestClose={() => setPickerVisible(false)}
+      >
         <CustomHeader
           title="Add exercises"
           showBackButton
@@ -429,10 +622,12 @@ export default function CustomWorkoutScreen() {
           initialQuery={search}
           onSearchQueryChange={setSearch}
           menuOpenOnTap
-          menuItems={[{
-            title: 'Create Exercise',
-            onPress: () => router.push('/exercise/create'),
-          }]}
+          menuItems={[
+            {
+              title: 'Create Exercise',
+              onPress: () => router.push('/exercise/create'),
+            },
+          ]}
           rightTextButton={{
             label: `ADD (${pickerSelected.size})`,
             disabled: pickerSelected.size === 0,
@@ -468,8 +663,11 @@ export default function CustomWorkoutScreen() {
                   const rankIndex = selectionOrder.indexOf(item.exerciseId);
                   const isSelected = rankIndex !== -1;
                   const isLetter = item.gifUrl?.startsWith('letter://');
-                  const letter = isLetter ? item.gifUrl.replace('letter://', '').slice(0, 1) || 'X' : 'X';
-                  const selectedBg = (colorScheme === 'dark') ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
+                  const letter = isLetter
+                    ? item.gifUrl.replace('letter://', '').slice(0, 1) || 'X'
+                    : 'X';
+                  const selectedBg =
+                    colorScheme === 'dark' ? 'rgba(10,126,164,0.35)' : 'rgba(10,126,164,0.12)';
                   return (
                     <TouchableOpacity
                       onPress={() => {
@@ -480,19 +678,26 @@ export default function CustomWorkoutScreen() {
                           return next;
                         });
                       }}
-                      style={[styles.exerciseContainer, isSelected && { backgroundColor: selectedBg }]}
+                      style={[
+                        styles.exerciseContainer,
+                        isSelected && { backgroundColor: selectedBg },
+                      ]}
                     >
                       <View style={styles.imageWrapper}>
                         {isSelected ? (
-                          <View style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 14,
-                            backgroundColor: colors.tint,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}>
-                            <Text style={{ color: '#fff', fontWeight: '700' }}>{rankIndex + 1}</Text>
+                          <View
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 14,
+                              backgroundColor: colors.tint,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Text style={{ color: '#fff', fontWeight: '700' }}>
+                              {rankIndex + 1}
+                            </Text>
                           </View>
                         ) : isLetter ? (
                           <View style={styles.letterAvatar}>
@@ -503,8 +708,12 @@ export default function CustomWorkoutScreen() {
                         )}
                       </View>
                       <View style={styles.exerciseDetails}>
-                        <ThemedText style={styles.exerciseName}>{toTitleCase(item.name)}</ThemedText>
-                        <ThemedText style={styles.exerciseBodyPart}>{toTitleCase(item.bodyParts?.join(', ') || '')}</ThemedText>
+                        <ThemedText style={styles.exerciseName}>
+                          {toTitleCase(item.name)}
+                        </ThemedText>
+                        <ThemedText style={styles.exerciseBodyPart}>
+                          {toTitleCase(item.bodyParts?.join(', ') || '')}
+                        </ThemedText>
                       </View>
                     </TouchableOpacity>
                   );
@@ -696,5 +905,3 @@ const styles = StyleSheet.create({
     borderBottomColor: '#2d2d2d',
   },
 });
-
-

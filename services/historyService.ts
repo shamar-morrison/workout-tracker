@@ -7,6 +7,8 @@ export type CompletedExerciseSummary = {
   name: string;
   setCount: number;
   bestSet: CompletedSet | null;
+  // Optional list of all completed sets for richer detail views; may be absent in older entries
+  sets?: CompletedSet[];
 };
 
 export type CompletedWorkout = {
@@ -65,7 +67,9 @@ function compareSets(a: CompletedSet | null, b: CompletedSet | null): number {
   return (a as CompletedSet).reps - (b as CompletedSet).reps;
 }
 
-export async function recordCompletedWorkout(input: Omit<CompletedWorkout, 'id' | 'prs'>): Promise<{ id: string; workoutNumber: number; prs: number }> {
+export async function recordCompletedWorkout(
+  input: Omit<CompletedWorkout, 'id' | 'prs'>,
+): Promise<{ id: string; workoutNumber: number; prs: number }> {
   const history = await loadHistory();
 
   // Build previous best by exercise
@@ -91,4 +95,11 @@ export async function recordCompletedWorkout(input: Omit<CompletedWorkout, 'id' 
   return { id, workoutNumber: nextHistory.length, prs };
 }
 
-
+export async function deleteWorkoutById(id: string): Promise<boolean> {
+  const history = await loadHistory();
+  const idx = history.findIndex((w) => w.id === id);
+  if (idx === -1) return false;
+  history.splice(idx, 1);
+  await saveHistory(history);
+  return true;
+}

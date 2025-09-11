@@ -1,3 +1,6 @@
+// Local storage helpers
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const BASE_URL = 'https://exercisedb-api-psi.vercel.app/api/v1';
 
 export interface Exercise {
@@ -17,8 +20,6 @@ export type ExerciseFilterOptions = {
   equipment?: string;
 };
 
-// Local storage helpers
-import AsyncStorage from '@react-native-async-storage/async-storage';
 const LOCAL_KEY = 'custom_exercises_v1';
 
 export async function loadLocalExercises(): Promise<Exercise[]> {
@@ -41,19 +42,32 @@ export async function saveLocalExercise(ex: Exercise): Promise<void> {
 export const fetchExercises = async (
   limit = 10,
   search = '',
-  options: ExerciseFilterOptions = {}
+  options: ExerciseFilterOptions = {},
 ): Promise<Exercise[]> => {
   const remote = await fetchRemoteExercises(limit, search, options).catch(() => [] as Exercise[]);
   const local = await loadLocalExercises();
 
   const matchesFilter = (e: Exercise) => {
-    if (options.bodyPart && !e.bodyParts.map((b) => b.toLowerCase()).includes(options.bodyPart.toLowerCase())) return false;
-    if (options.target && !e.targetMuscles.map((t) => t.toLowerCase()).includes(options.target.toLowerCase())) return false;
-    if (options.equipment && !e.equipments.map((t) => t.toLowerCase()).includes(options.equipment.toLowerCase())) return false;
+    if (
+      options.bodyPart &&
+      !e.bodyParts.map((b) => b.toLowerCase()).includes(options.bodyPart.toLowerCase())
+    )
+      return false;
+    if (
+      options.target &&
+      !e.targetMuscles.map((t) => t.toLowerCase()).includes(options.target.toLowerCase())
+    )
+      return false;
+    if (
+      options.equipment &&
+      !e.equipments.map((t) => t.toLowerCase()).includes(options.equipment.toLowerCase())
+    )
+      return false;
     return true;
   };
 
-  const matchesSearch = (e: Exercise) => (search ? e.name.toLowerCase().includes(search.toLowerCase()) : true);
+  const matchesSearch = (e: Exercise) =>
+    search ? e.name.toLowerCase().includes(search.toLowerCase()) : true;
 
   const merged = [...local.filter(matchesFilter).filter(matchesSearch), ...remote];
   // De-dup by exerciseId (prefer local first)
@@ -70,7 +84,7 @@ export const fetchExercises = async (
 async function fetchRemoteExercises(
   limit = 10,
   search = '',
-  options: ExerciseFilterOptions = {}
+  options: ExerciseFilterOptions = {},
 ): Promise<Exercise[]> {
   const { bodyPart, target, equipment } = options;
 
@@ -85,7 +99,9 @@ async function fetchRemoteExercises(
   if (bodyPart) {
     const alt = new URLSearchParams({ limit: String(limit) });
     if (search) alt.append('search', search);
-    candidates.push(`${BASE_URL}/exercises/bodyPart/${encodeURIComponent(bodyPart)}?${alt.toString()}`);
+    candidates.push(
+      `${BASE_URL}/exercises/bodyPart/${encodeURIComponent(bodyPart)}?${alt.toString()}`,
+    );
   }
   if (target) {
     const alt = new URLSearchParams({ limit: String(limit) });
@@ -95,7 +111,9 @@ async function fetchRemoteExercises(
   if (equipment) {
     const alt = new URLSearchParams({ limit: String(limit) });
     if (search) alt.append('search', search);
-    candidates.push(`${BASE_URL}/exercises/equipment/${encodeURIComponent(equipment)}?${alt.toString()}`);
+    candidates.push(
+      `${BASE_URL}/exercises/equipment/${encodeURIComponent(equipment)}?${alt.toString()}`,
+    );
   }
 
   let lastError: unknown = null;
@@ -120,7 +138,18 @@ async function fetchRemoteExercises(
 
 export const fetchBodyParts = async (): Promise<string[]> => {
   // Not used anymore in create; kept for compatibility
-  return ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core', 'Glutes', 'Calves', 'Full body', 'Other'];
+  return [
+    'Chest',
+    'Back',
+    'Legs',
+    'Arms',
+    'Shoulders',
+    'Core',
+    'Glutes',
+    'Calves',
+    'Full body',
+    'Other',
+  ];
 };
 
 export const fetchTargets = async (): Promise<string[]> => {

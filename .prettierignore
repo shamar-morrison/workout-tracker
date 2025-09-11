@@ -1,0 +1,13 @@
+node_modules
+android
+ios
+build
+.expo
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+**/*.svg
+**/*.jar
+**/*.xcworkspace
+**/*.xcassets
