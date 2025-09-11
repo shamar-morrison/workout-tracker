@@ -53,6 +53,26 @@ export default function CustomWorkoutScreen() {
   const [editSheetVisible, setEditSheetVisible] = React.useState(false);
   const [pickerVisible, setPickerVisible] = React.useState(false);
   const [reorderMode, setReorderMode] = React.useState(false);
+  const dragMapRef = React.useRef<Record<string, (() => void) | undefined>>({});
+  const pendingDragIdRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (!reorderMode) return;
+    const id = pendingDragIdRef.current;
+    if (!id) return;
+    let attempts = 0;
+    const tryStart = () => {
+      const start = dragMapRef.current[id];
+      if (start) {
+        pendingDragIdRef.current = null;
+        setTimeout(() => start(), 10);
+      } else if (attempts < 20) {
+        attempts += 1;
+        setTimeout(tryStart, 30);
+      }
+    };
+    tryStart();
+  }, [reorderMode, session.exercises]);
 
   // Picker-related state
   const [search, setSearch] = React.useState('');
@@ -351,6 +371,17 @@ export default function CustomWorkoutScreen() {
                 keyExtractor={(item) => item.id}
                 activationDistance={12}
                 onDragEnd={({ data }) => update({ exercises: data })}
+                onLayout={() => {
+                  const id = pendingDragIdRef.current;
+                  if (id) {
+                    const startDrag = dragMapRef.current[id];
+                    pendingDragIdRef.current = null;
+                    if (startDrag) {
+                      // slight delay to ensure items are mounted
+                      setTimeout(() => startDrag(), 30);
+                    }
+                  }
+                }}
                 ListHeaderComponent={() => (
                   <View style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
                     <ThemedText style={{ opacity: 0.8 }}>
@@ -360,6 +391,13 @@ export default function CustomWorkoutScreen() {
                 )}
                 renderItem={({ item, drag, isActive, getIndex }) => (
                   <TouchableOpacity
+                    onLayout={() => {
+                      dragMapRef.current[item.id] = drag;
+                      if (pendingDragIdRef.current === item.id) {
+                        // Immediately start dragging for the item that triggered reorder
+                        setTimeout(() => drag(), 10);
+                      }
+                    }}
                     onLongPress={drag}
                     activeOpacity={0.9}
                     style={{
@@ -435,7 +473,13 @@ export default function CustomWorkoutScreen() {
                 onMomentumScrollEnd={flushRefocus}
                 onScrollEndDrag={flushRefocus}
                 renderItem={({ item, index }) => (
-                  <Pressable onLongPress={() => setReorderMode(true)} delayLongPress={280}>
+                  <Pressable
+                    onLongPress={() => {
+                      pendingDragIdRef.current = item.id;
+                      setReorderMode(true);
+                    }}
+                    delayLongPress={280}
+                  >
                     <ExerciseCardItem
                       item={item}
                       onInputFocus={(refocus) => {
