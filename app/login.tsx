@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -28,6 +27,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -41,10 +41,11 @@ export default function LoginScreen() {
   async function handleSignIn() {
     try {
       setLoading(true);
+      setError(null);
       await signInWithEmail(email.trim(), password);
       router.replace('/');
     } catch (e: any) {
-      Alert.alert('Sign in failed', e?.message ?? 'Unknown error');
+      setError(e?.message ?? 'Sign in failed');
     } finally {
       setLoading(false);
     }
@@ -53,10 +54,11 @@ export default function LoginScreen() {
   async function handleSignUp() {
     try {
       setLoading(true);
+      setError(null);
       await signUpWithEmail(email.trim(), password);
       router.replace('/');
     } catch (e: any) {
-      Alert.alert('Sign up failed', e?.message ?? 'Unknown error');
+      setError(e?.message ?? 'Sign up failed');
     } finally {
       setLoading(false);
     }
@@ -106,6 +108,7 @@ export default function LoginScreen() {
                 returnKeyType="go"
                 onSubmitEditing={handleSignIn}
               />
+              {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
               <View style={{ height: 16 }} />
               <View style={styles.row}>
                 <ThemedText onPress={handleSignIn} style={styles.cta}>
@@ -151,6 +154,10 @@ const styles = StyleSheet.create({
     paddingVertical: Platform.select({ ios: 14, default: 12 }),
     backgroundColor: '#fff',
     color: '#111',
+  },
+  errorText: {
+    color: '#b91c1c',
+    marginTop: 6,
   },
   row: {
     flexDirection: 'row',
