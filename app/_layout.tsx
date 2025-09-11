@@ -11,6 +11,7 @@ import 'react-native-reanimated';
 
 // Active banner is now integrated into TabBar; keeping import commented if needed in future
 // import ActiveWorkoutBanner from '@/components/ActiveWorkoutBanner';
+import { AuthProvider } from '@/context/AuthContext';
 import { WorkoutSessionProvider } from '@/context/WorkoutSessionContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import {
@@ -37,20 +38,27 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <ExpoContextMenuProvider>
-        <WorkoutSessionProvider>
-          <NotificationRedirector />
-          <>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="exercise/create" options={{ headerShown: false }} />
-              <Stack.Screen name="workout/custom" options={{ headerShown: false }} />
-              <Stack.Screen name="history/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            {/* Banner moved into custom TabBar */}
-          </>
-          <StatusBar style="auto" />
-        </WorkoutSessionProvider>
+        <AuthProvider>
+          <WorkoutSessionProvider>
+            <NotificationRedirector />
+            <>
+              <Stack>
+                <Stack.Screen name="login" options={{ title: 'Login', headerShown: true }} />
+                <Stack.Screen
+                  name="signup"
+                  options={{ title: 'Create Account', headerShown: true }}
+                />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="exercise/create" options={{ headerShown: false }} />
+                <Stack.Screen name="workout/custom" options={{ headerShown: false }} />
+                <Stack.Screen name="history/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              {/* Banner moved into custom TabBar */}
+            </>
+            <StatusBar style="auto" />
+          </WorkoutSessionProvider>
+        </AuthProvider>
       </ExpoContextMenuProvider>
     </ThemeProvider>
   );

@@ -100,3 +100,30 @@ Routing uses Expo Router with typed routes (`app.json` enables `experiments.type
 - If images don’t appear, ensure network access for the simulator/emulator
 - If local custom exercises don’t show, verify storage permissions and try reinstalling the app to clear caches
 - iOS simulators may require a clean build if native modules were updated
+
+## Firebase setup (Auth + Firestore)
+
+1. Create a project in the Firebase Console and enable Authentication (Email/Password) and Firestore.
+2. In Project Settings → General, add iOS, Android, and Web apps to your project to obtain config.
+3. Copy your Web config values into Expo env vars in a `.env` file at the project root:
+   - `EXPO_PUBLIC_FIREBASE_API_KEY`
+   - `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
+   - `EXPO_PUBLIC_FIREBASE_PROJECT_ID`
+   - `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `EXPO_PUBLIC_FIREBASE_APP_ID`
+   - `EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID` (optional)
+4. Firestore rules (development example):
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+5. Restart the dev server after adding env vars. For native changes, rebuild dev client.
