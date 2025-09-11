@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -26,6 +27,16 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   async function handleSignIn() {
     try {
@@ -61,7 +72,10 @@ export default function LoginScreen() {
       >
         <ThemedView style={{ flex: 1 }}>
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              keyboardVisible ? styles.alignTop : styles.alignCenter,
+            ]}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.select({ ios: 'on-drag', default: 'none' })}
             showsVerticalScrollIndicator={false}
@@ -117,12 +131,17 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 24,
+    paddingVertical: 24,
+  },
+  alignCenter: {
+    justifyContent: 'center',
+  },
+  alignTop: {
+    justifyContent: 'flex-start',
   },
   container: {
     padding: 24,
     gap: 8,
-    justifyContent: 'flex-start',
   },
   input: {
     borderWidth: 1,
