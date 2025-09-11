@@ -21,6 +21,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext';
+import { mapFirebaseAuthError } from '@/utils/authErrors';
 
 export default function SignUpScreen() {
   const { signUpWithEmail } = useAuth();
@@ -64,7 +65,7 @@ export default function SignUpScreen() {
       await signUpWithEmail(email.trim(), password, displayName.trim());
       router.replace('/');
     } catch (e: any) {
-      setError(e?.message ?? 'Sign up failed');
+      setError(mapFirebaseAuthError(e.code));
     } finally {
       setLoading(false);
     }
