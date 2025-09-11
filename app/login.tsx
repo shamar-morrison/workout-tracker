@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    gap: 8,
+    gap: 1,
   },
   passwordContainer: {
     position: 'relative',
