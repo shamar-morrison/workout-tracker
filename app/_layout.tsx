@@ -44,6 +44,10 @@ export default function RootLayout() {
             <>
               <Stack>
                 <Stack.Screen name="login" options={{ title: 'Login', headerShown: true }} />
+                <Stack.Screen
+                  name="signup"
+                  options={{ title: 'Create Account', headerShown: true }}
+                />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="exercise/create" options={{ headerShown: false }} />
                 <Stack.Screen name="workout/custom" options={{ headerShown: false }} />

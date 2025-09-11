@@ -22,11 +22,12 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext';
 
-export default function LoginScreen() {
-  const { signInWithEmail } = useAuth();
+export default function SignUpScreen() {
+  const { signUpWithEmail } = useAuth();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
 
+  const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
@@ -44,22 +45,26 @@ export default function LoginScreen() {
   }, []);
 
   function validateFields() {
-    if (!email.trim() || !password.trim()) {
-      setError('Email and password are required.');
+    if (!email.trim() || !password.trim() || !displayName.trim()) {
+      setError('All fields are required.');
+      return false;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
       return false;
     }
     return true;
   }
 
-  async function handleSignIn() {
+  async function handleSignUp() {
     if (!validateFields()) return;
     try {
       setLoading(true);
       setError(null);
-      await signInWithEmail(email.trim(), password);
+      await signUpWithEmail(email.trim(), password, displayName.trim());
       router.replace('/');
     } catch (e: any) {
-      setError(e?.message ?? 'Sign in failed');
+      setError(e?.message ?? 'Sign up failed');
     } finally {
       setLoading(false);
     }
@@ -67,7 +72,7 @@ export default function LoginScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Login' }} />
+      <Stack.Screen options={{ title: 'Create Account' }} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
@@ -84,8 +89,19 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
             <ThemedView style={styles.container}>
-              <ThemedText type="title">Welcome back</ThemedText>
+              <ThemedText type="title">Get started</ThemedText>
               <View style={{ height: 16 }} />
+              <TextInput
+                autoCapitalize="words"
+                autoComplete="name"
+                placeholder="Display Name"
+                placeholderTextColor="#999"
+                value={displayName}
+                onChangeText={setDisplayName}
+                style={styles.input}
+                returnKeyType="next"
+              />
+              <View style={{ height: 12 }} />
               <TextInput
                 autoCapitalize="none"
                 autoComplete="email"
@@ -102,13 +118,13 @@ export default function LoginScreen() {
                 <TextInput
                   autoCapitalize="none"
                   secureTextEntry={!isPasswordVisible}
-                  placeholder="Password"
+                  placeholder="Password (min. 6 characters)"
                   placeholderTextColor="#999"
                   value={password}
                   onChangeText={setPassword}
                   style={styles.input}
                   returnKeyType="go"
-                  onSubmitEditing={handleSignIn}
+                  onSubmitEditing={handleSignUp}
                 />
                 <TouchableOpacity
                   onPress={() => setPasswordVisible((prev) => !prev)}
@@ -119,16 +135,16 @@ export default function LoginScreen() {
               </View>
               {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
               <View style={{ height: 16 }} />
-              <TouchableOpacity onPress={handleSignIn} style={styles.ctaButton} disabled={loading}>
+              <TouchableOpacity onPress={handleSignUp} style={styles.ctaButton} disabled={loading}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <ThemedText style={styles.ctaButtonText}>Sign In</ThemedText>
+                  <ThemedText style={styles.ctaButtonText}>Create Account</ThemedText>
                 )}
               </TouchableOpacity>
               <View style={{ height: 20 }} />
-              <Link href="/signup">
-                <ThemedText type="link">Create an account</ThemedText>
+              <Link href="/login">
+                <ThemedText type="link">Back to Login</ThemedText>
               </Link>
             </ThemedView>
           </ScrollView>
