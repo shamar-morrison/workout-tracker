@@ -87,20 +87,23 @@ export default function ExerciseCard({
     key: 'weight' | 'reps' | 'completed',
     value: string | boolean,
   ) => {
-    const nextSets = item.sets.map((s, i) => {
-      if (i !== index) return s;
-      if (key === 'weight') {
-        const text = (value as string) ?? '';
-        const parsed = parseFloat(text.replace(',', '.'));
-        const weightLbs = isFinite(parsed)
-          ? item.weightUnit === 'kg'
-            ? parsed * LB_PER_KG
-            : parsed
-          : undefined;
-        return { ...s, weight: text, weightLbs };
-      }
-      return { ...s, [key]: value } as any;
-    });
+    // Update immutably but avoid replacing array/object identities beyond the changed set
+    const nextSets = [...item.sets];
+    const existing = nextSets[index];
+    if (!existing) return;
+    if (key === 'weight') {
+      const text = (value as string) ?? '';
+      const parsed = parseFloat(text.replace(',', '.'));
+      const weightLbs = isFinite(parsed)
+        ? item.weightUnit === 'kg'
+          ? parsed * LB_PER_KG
+          : parsed
+        : undefined;
+      nextSets[index] = { ...existing, weight: text, weightLbs };
+    } else {
+      nextSets[index] = { ...(existing as any), [key]: value } as any;
+    }
+    // Only replace the sets array if necessary, to reduce re-mounts that steal focus
     onUpdate({ ...item, sets: nextSets });
   };
 
@@ -292,7 +295,7 @@ export default function ExerciseCard({
             const k = set.id ?? String(idx);
             if (ref) swipeRefs.current[k] = ref;
           }}
-          key={(set.id ?? String(idx)) + '_' + (set.weight ?? '') + '_' + (set.reps ?? '')}
+          key={set.id ?? String(idx)}
           renderRightActions={(_progress, dragX) => {
             const translateX = dragX.interpolate({
               inputRange: [-100, 0],
