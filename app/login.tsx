@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import {
   ActivityIndicator,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -24,7 +25,7 @@ import { useAuth } from '@/context/AuthContext';
 import { mapFirebaseAuthError } from '@/utils/authErrors';
 
 export default function LoginScreen() {
-  const { signInWithEmail } = useAuth();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
 
@@ -32,6 +33,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +65,19 @@ export default function LoginScreen() {
       setError(mapFirebaseAuthError(e.code));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    try {
+      setGoogleLoading(true);
+      setError(null);
+      await signInWithGoogle();
+      router.replace('/');
+    } catch (e: any) {
+      setError(mapFirebaseAuthError(e.code));
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -120,13 +135,44 @@ export default function LoginScreen() {
               </View>
               {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
               <View style={{ height: 16 }} />
-              <TouchableOpacity onPress={handleSignIn} style={styles.ctaButton} disabled={loading}>
+              <TouchableOpacity
+                onPress={handleSignIn}
+                style={styles.ctaButton}
+                disabled={loading || googleLoading}
+              >
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <ThemedText style={styles.ctaButtonText}>Sign In</ThemedText>
                 )}
               </TouchableOpacity>
+
+              <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <ThemedText style={styles.dividerText}>or</ThemedText>
+                <View style={styles.divider} />
+              </View>
+
+              <TouchableOpacity
+                onPress={handleGoogleSignIn}
+                style={styles.googleButton}
+                disabled={loading || googleLoading}
+              >
+                {googleLoading ? (
+                  <ActivityIndicator color="#000" />
+                ) : (
+                  <>
+                    <Image
+                      source={{
+                        uri: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
+                      }}
+                      style={styles.googleIcon}
+                    />
+                    <ThemedText style={styles.googleButtonText}>Sign in with Google</ThemedText>
+                  </>
+                )}
+              </TouchableOpacity>
+
               <View style={{ height: 20 }} />
               <Link href="/signup">
                 <ThemedText type="link">Create an account</ThemedText>
@@ -152,7 +198,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    gap: 1,
+    gap: 8,
   },
   passwordContainer: {
     position: 'relative',
@@ -185,6 +231,40 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     color: '#fff',
+    fontWeight: '600',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: '#999',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  googleButtonText: {
+    color: '#111',
     fontWeight: '600',
   },
 });

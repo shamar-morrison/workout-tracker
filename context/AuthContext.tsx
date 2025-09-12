@@ -1,9 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {
+  GoogleAuthProvider,
   User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -16,10 +19,15 @@ type AuthContextValue = {
   initializing: boolean;
   signUpWithEmail: (email: string, password: string, displayName?: string) => Promise<User>;
   signInWithEmail: (email: string, password: string) => Promise<User>;
+  signInWithGoogle: () => Promise<User>;
   signOutUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+GoogleSignin.configure({
+  webClientId: '454042645193-tc628j4drjp2dlktg8ikcso50cr22bln.apps.googleusercontent.com',
+});
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -48,7 +56,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const credential = await signInWithEmailAndPassword(auth, email, password);
         return credential.user;
       },
+      async signInWithGoogle() {
+        await GoogleSignin.hasPlayServices();
+        const { idToken } = (await GoogleSignin.signIn()) as any;
+        const googleCredential = GoogleAuthProvider.credential(idToken);
+        const userCredential = await signInWithCredential(auth, googleCredential);
+        return userCredential.user;
+      },
       async signOutUser() {
+        await GoogleSignin.signOut();
         await signOut(auth);
       },
     }),

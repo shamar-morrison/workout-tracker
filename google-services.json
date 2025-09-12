@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "454042645193",
+    "project_id": "workout-tracker-edufocal",
+    "storage_bucket": "workout-tracker-edufocal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454042645193:android:0a08219737c73c7f9e1318",
+        "android_client_info": {
+          "package_name": "com.horizonhuntxr.workouttracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "454042645193-qr9km6mene8urv6hnc2r3qaj2kk6ug0i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.horizonhuntxr.workouttracker",
+            "certificate_hash": "1eb03b217ea40f22b100bec55e9c368233e38df2"
+          }
+        },
+        {
+          "client_id": "454042645193-tc628j4drjp2dlktg8ikcso50cr22bln.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9P3yCk1NCjMHnutjXJNfNIRTsi_qZcPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "454042645193-tc628j4drjp2dlktg8ikcso50cr22bln.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
