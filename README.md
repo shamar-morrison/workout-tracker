@@ -103,22 +103,27 @@ Routing uses Expo Router with typed routes (`app.json` enables `experiments.type
 
 ## Firebase setup (Auth + Firestore)
 
-1. Create a project in the Firebase Console and enable Authentication (Email/Password) and Firestore.
-2. In Project Settings → General, add iOS, Android, and Web apps to your project to obtain config.
-3. Copy your Web config values into Expo env vars in a `.env` file at the project root:
-   - `EXPO_PUBLIC_FIREBASE_API_KEY`
-   - `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
-   - `EXPO_PUBLIC_FIREBASE_PROJECT_ID`
-   - `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`
-   - `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
-   - `EXPO_PUBLIC_FIREBASE_APP_ID`
-   - `EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID` (optional)
-4. Firestore rules (development example):
+This app uses Firebase for user authentication (sign-up/login) and Firestore for storing user-specific data, such as workout history or custom exercises.
+
+1.  Create a project in the Firebase Console and enable Authentication (Email/Password provider) and Firestore.
+2.  In Project Settings → General, add iOS, Android, and Web apps to your project to obtain config.
+3.  Copy your Web config values into Expo env vars in a `.env` file at the project root:
+    - `EXPO_PUBLIC_FIREBASE_API_KEY`
+    - `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
+    - `EXPO_PUBLIC_FIREBASE_PROJECT_ID`
+    - `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`
+    - `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+    - `EXPO_PUBLIC_FIREBASE_APP_ID`
+    - `EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID` (optional)
+4.  Initialize Firebase in your application (e.g., in `services/firebase.ts`) using these environment variables.
+5.  Firestore rules (basic development example; implement robust rules for production):
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Allow read/write only if the user is authenticated.
+    // IMPORTANT: Implement more granular security rules for production environments.
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
