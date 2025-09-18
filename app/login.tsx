@@ -128,9 +128,14 @@ export default function LoginScreen() {
                 )}
               </TouchableOpacity>
               <View style={{ height: 20 }} />
-              <Link href="/signup">
-                <ThemedText type="link">Create an account</ThemedText>
-              </Link>
+              <View style={styles.signupContainer}>
+                <ThemedText>Don&apos;t have an account? </ThemedText>
+                <Link href="/signup" asChild>
+                  <TouchableOpacity>
+                    <ThemedText type="link">Sign up</ThemedText>
+                  </TouchableOpacity>
+                </Link>
+              </View>
             </ThemedView>
           </ScrollView>
         </ThemedView>
@@ -143,6 +148,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingVertical: 24,
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   alignCenter: {
     justifyContent: 'center',
